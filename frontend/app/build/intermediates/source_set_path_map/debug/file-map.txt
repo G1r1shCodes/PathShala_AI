@@ -1,0 +1,50 @@
+com.pathshala.ai.app-core-runtime-2.2.0-0 C:\Users\giris\.gradle\caches\transforms-4\000f70ba4f31d84dc8014a94b76b428a\transformed\core-runtime-2.2.0\res
+com.pathshala.ai.app-jetified-ui-unit-release-1 C:\Users\giris\.gradle\caches\transforms-4\011f690eaf5e70af9578543d79f34984\transformed\jetified-ui-unit-release\res
+com.pathshala.ai.app-jetified-lifecycle-runtime-compose-release-2 C:\Users\giris\.gradle\caches\transforms-4\02cc488792f5ca2330bc516d2a459226\transformed\jetified-lifecycle-runtime-compose-release\res
+com.pathshala.ai.app-jetified-lifecycle-viewmodel-compose-release-3 C:\Users\giris\.gradle\caches\transforms-4\094d49cde5f2b0d6662b1e02cb00a1db\transformed\jetified-lifecycle-viewmodel-compose-release\res
+com.pathshala.ai.app-jetified-activity-ktx-1.8.2-4 C:\Users\giris\.gradle\caches\transforms-4\11157afeff364e4cafd5247733042200\transformed\jetified-activity-ktx-1.8.2\res
+com.pathshala.ai.app-jetified-ui-graphics-release-5 C:\Users\giris\.gradle\caches\transforms-4\16c2a30dcb3e3cd197d4ffb769ec0369\transformed\jetified-ui-graphics-release\res
+com.pathshala.ai.app-jetified-annotation-experimental-1.4.0-6 C:\Users\giris\.gradle\caches\transforms-4\1e1c1feda1d6ffba102022199ef50451\transformed\jetified-annotation-experimental-1.4.0\res
+com.pathshala.ai.app-jetified-activity-1.8.2-7 C:\Users\giris\.gradle\caches\transforms-4\20b1a4684ae252d4666a279ae0585e27\transformed\jetified-activity-1.8.2\res
+com.pathshala.ai.app-jetified-customview-poolingcontainer-1.0.0-8 C:\Users\giris\.gradle\caches\transforms-4\24943b2e9fa5f8cdaf796f731da46c8e\transformed\jetified-customview-poolingcontainer-1.0.0\res
+com.pathshala.ai.app-jetified-core-ktx-1.13.1-9 C:\Users\giris\.gradle\caches\transforms-4\369a2a5da5f617c0fa09a95a4bd48acf\transformed\jetified-core-ktx-1.13.1\res
+com.pathshala.ai.app-jetified-lifecycle-viewmodel-savedstate-2.8.3-10 C:\Users\giris\.gradle\caches\transforms-4\39b139f596d5f0d9911a85219507cf63\transformed\jetified-lifecycle-viewmodel-savedstate-2.8.3\res
+com.pathshala.ai.app-jetified-animation-core-release-11 C:\Users\giris\.gradle\caches\transforms-4\3ce6bfb01f91696845f390431901726c\transformed\jetified-animation-core-release\res
+com.pathshala.ai.app-jetified-runtime-release-12 C:\Users\giris\.gradle\caches\transforms-4\4899f4e3557a6441ee3b6dc6ed0ddf84\transformed\jetified-runtime-release\res
+com.pathshala.ai.app-jetified-graphics-path-1.0.1-13 C:\Users\giris\.gradle\caches\transforms-4\5409b045bf95fe8bfa3ade68befcca22\transformed\jetified-graphics-path-1.0.1\res
+com.pathshala.ai.app-jetified-animation-release-14 C:\Users\giris\.gradle\caches\transforms-4\5421df28f9ea5c65901790a0364d62e5\transformed\jetified-animation-release\res
+com.pathshala.ai.app-jetified-emoji2-1.3.0-15 C:\Users\giris\.gradle\caches\transforms-4\64b256834cbd463a043d152914d916e3\transformed\jetified-emoji2-1.3.0\res
+com.pathshala.ai.app-core-1.13.1-16 C:\Users\giris\.gradle\caches\transforms-4\74714178b00ba501e7cc193af1cf356e\transformed\core-1.13.1\res
+com.pathshala.ai.app-jetified-lifecycle-runtime-release-17 C:\Users\giris\.gradle\caches\transforms-4\7ef72739713d66bce6dcb67f53551b01\transformed\jetified-lifecycle-runtime-release\res
+com.pathshala.ai.app-jetified-startup-runtime-1.1.1-18 C:\Users\giris\.gradle\caches\transforms-4\86a6d0aaa0de764ec754c393850aa54c\transformed\jetified-startup-runtime-1.1.1\res
+com.pathshala.ai.app-jetified-lifecycle-viewmodel-ktx-2.8.3-19 C:\Users\giris\.gradle\caches\transforms-4\8901c87f85938a298b74d39fa2adc1dd\transformed\jetified-lifecycle-viewmodel-ktx-2.8.3\res
+com.pathshala.ai.app-lifecycle-livedata-core-2.8.3-20 C:\Users\giris\.gradle\caches\transforms-4\8d81103b2ec357b35021a19ff155f90c\transformed\lifecycle-livedata-core-2.8.3\res
+com.pathshala.ai.app-jetified-material-icons-core-release-21 C:\Users\giris\.gradle\caches\transforms-4\923d5a79361e0326206aeea632089edc\transformed\jetified-material-icons-core-release\res
+com.pathshala.ai.app-jetified-lifecycle-viewmodel-release-22 C:\Users\giris\.gradle\caches\transforms-4\97ec827cb177dd7b203d7fe99b1be667\transformed\jetified-lifecycle-viewmodel-release\res
+com.pathshala.ai.app-jetified-profileinstaller-1.3.1-23 C:\Users\giris\.gradle\caches\transforms-4\9a7c63fc215b3763a8effc31d560b94f\transformed\jetified-profileinstaller-1.3.1\res
+com.pathshala.ai.app-jetified-lifecycle-process-2.8.3-24 C:\Users\giris\.gradle\caches\transforms-4\9e170c4a9b83e2a7f3142701be7a508e\transformed\jetified-lifecycle-process-2.8.3\res
+com.pathshala.ai.app-jetified-foundation-layout-release-25 C:\Users\giris\.gradle\caches\transforms-4\9f284803424bb1bd20805e13560e98f8\transformed\jetified-foundation-layout-release\res
+com.pathshala.ai.app-jetified-ui-tooling-release-26 C:\Users\giris\.gradle\caches\transforms-4\a1e312822c2694766aca25acb0bcd286\transformed\jetified-ui-tooling-release\res
+com.pathshala.ai.app-jetified-savedstate-1.2.1-27 C:\Users\giris\.gradle\caches\transforms-4\a249f7ad76ef336d4982e75ae375ed9a\transformed\jetified-savedstate-1.2.1\res
+com.pathshala.ai.app-jetified-material-release-28 C:\Users\giris\.gradle\caches\transforms-4\af38b217cd6efa82cf60d7c23189b2c7\transformed\jetified-material-release\res
+com.pathshala.ai.app-jetified-activity-compose-1.8.2-29 C:\Users\giris\.gradle\caches\transforms-4\b43cfcbb341e0154335275bb1eff542f\transformed\jetified-activity-compose-1.8.2\res
+com.pathshala.ai.app-jetified-ui-text-release-30 C:\Users\giris\.gradle\caches\transforms-4\c0dc53a37bdc0103898ab89f1add681b\transformed\jetified-ui-text-release\res
+com.pathshala.ai.app-jetified-ui-tooling-preview-release-31 C:\Users\giris\.gradle\caches\transforms-4\c68441322bc06398e16cbe30135a1025\transformed\jetified-ui-tooling-preview-release\res
+com.pathshala.ai.app-jetified-lifecycle-runtime-ktx-release-32 C:\Users\giris\.gradle\caches\transforms-4\cb5b8d9db8d6e0475ef0c3d13dd7385a\transformed\jetified-lifecycle-runtime-ktx-release\res
+com.pathshala.ai.app-jetified-material-ripple-release-33 C:\Users\giris\.gradle\caches\transforms-4\cb6f95677bf33164c2a97b29564399c2\transformed\jetified-material-ripple-release\res
+com.pathshala.ai.app-jetified-ui-release-34 C:\Users\giris\.gradle\caches\transforms-4\d0fb9d79f9dbc6c73afac2485b2f8d5f\transformed\jetified-ui-release\res
+com.pathshala.ai.app-jetified-savedstate-ktx-1.2.1-35 C:\Users\giris\.gradle\caches\transforms-4\dbc24b95463d69243ff34c27628b681d\transformed\jetified-savedstate-ktx-1.2.1\res
+com.pathshala.ai.app-jetified-foundation-release-36 C:\Users\giris\.gradle\caches\transforms-4\dc0a7ee3e9cb7adda0a5f3a55a8769dc\transformed\jetified-foundation-release\res
+com.pathshala.ai.app-jetified-ui-test-manifest-1.7.0-37 C:\Users\giris\.gradle\caches\transforms-4\dcf36e232ef443ab9bbe248087901981\transformed\jetified-ui-test-manifest-1.7.0\res
+com.pathshala.ai.app-jetified-ui-geometry-release-38 C:\Users\giris\.gradle\caches\transforms-4\e0058550bf9f3ea7d3e525b56991e897\transformed\jetified-ui-geometry-release\res
+com.pathshala.ai.app-jetified-material-icons-extended-release-39 C:\Users\giris\.gradle\caches\transforms-4\e58a38f417555d42201d7bfaa2899140\transformed\jetified-material-icons-extended-release\res
+com.pathshala.ai.app-jetified-runtime-saveable-release-40 C:\Users\giris\.gradle\caches\transforms-4\e817ca085cf245ac676939b161a05be8\transformed\jetified-runtime-saveable-release\res
+com.pathshala.ai.app-jetified-material3-release-41 C:\Users\giris\.gradle\caches\transforms-4\e9bc8424a72b710e63245e1f488f670e\transformed\jetified-material3-release\res
+com.pathshala.ai.app-jetified-ui-tooling-data-release-42 C:\Users\giris\.gradle\caches\transforms-4\ec46826a90cd9402eb6927cdb1fb0dd9\transformed\jetified-ui-tooling-data-release\res
+com.pathshala.ai.app-jetified-ui-util-release-43 C:\Users\giris\.gradle\caches\transforms-4\f3634a6b59fd478d4cd2472ea5e6c580\transformed\jetified-ui-util-release\res
+com.pathshala.ai.app-resValues-44 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\generated\res\resValues\debug
+com.pathshala.ai.app-packageDebugResources-45 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.pathshala.ai.app-packageDebugResources-46 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.pathshala.ai.app-merged_res-47 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\intermediates\merged_res\debug
+com.pathshala.ai.app-debug-48 C:\Users\giris\Desktop\PathShala AI\frontend\app\src\debug\res
+com.pathshala.ai.app-main-49 C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\res

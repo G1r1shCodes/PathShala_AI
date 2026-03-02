@@ -1,0 +1,6 @@
+[
+    {
+        "merged": "com.pathshala.ai.app-merged_res-48:/xml_network_security_config.xml.flat",
+        "source": "com.pathshala.ai.app-main-50:/xml/network_security_config.xml"
+    }
+]
