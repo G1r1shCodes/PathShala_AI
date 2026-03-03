@@ -19,3 +19,5 @@ services:
         value: "+916369631956"
       - key: APP_ENV
         value: production
+      - key: PYTHON_VERSION
+        value: 3.12.2
