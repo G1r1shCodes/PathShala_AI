@@ -44,8 +44,7 @@ class MainActivity : ComponentActivity() {
                     color    = MaterialTheme.colorScheme.background
                 ) {
                     PathShalaScreen(
-                        onMicClick = { onMicPressed() },
-                        vm = vm
+                        onMicClick = { onMicPressed() }
                     )
                 }
             }
