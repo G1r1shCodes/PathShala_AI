@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: pathshala-ai
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        value: "+14155238886"
+      - key: TWILIO_WHATSAPP_TO
+        value: "+916369631956"
+      - key: APP_ENV
+        value: production
