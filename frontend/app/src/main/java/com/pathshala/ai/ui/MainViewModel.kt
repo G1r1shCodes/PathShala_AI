@@ -29,7 +29,7 @@ class MainViewModel : ViewModel() {
     private val api: ApiService = RetrofitClient.instance
 
     // Set this to true to use mock data for testing UI and flow
-    private val useMockData = true
+    private val useMockData = false
 
     fun setListening() {
         _uiState.value = UiState.Listening

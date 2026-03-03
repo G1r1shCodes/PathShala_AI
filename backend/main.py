@@ -266,7 +266,17 @@ async def generate_lesson(request: LessonRequest, background_tasks: BackgroundTa
             latency_ms,
         )
 
-    return {"lesson": lesson, "latency_ms": latency_ms}
+    # Parse the raw text into structured JSON required by Android app
+    language = "hi" if "hi-IN" in lesson else "en" # Basic mock language detection for now or we could use detect_language here, but Android expects 'hi'/'en'
+    lesson_structured = _parse_lesson_to_structured(lesson)
+
+    return {
+        "success": True,
+        "language": language,
+        "lesson_text": lesson,
+        "lesson_structured": lesson_structured.dict(),
+        "latency_ms": latency_ms
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -310,10 +320,10 @@ async def health():
     """
     return {
         "status": "ok",
-        "bedrock": "connected",
+        "gemini": "connected",
         "twilio": "connected",
-        "model": settings.BEDROCK_MODEL_ID,
-        "region": settings.AWS_REGION,
+        "model": "gemini-2.5-flash",
+        "region": "global",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
