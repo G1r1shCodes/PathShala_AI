@@ -1,0 +1,85 @@
+# ─── Secrets / Environment ────────────────────────────────────────────────────
+.env
+*.env
+.env.*
+!.env.example
+
+# ─── Python / Backend ─────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# MyPy
+.mypy_cache/
+
+# ─── Android / Frontend ───────────────────────────────────────────────────────
+# Build outputs
+frontend/app/build/
+frontend/build/
+*.apk
+*.aab
+*.aar
+*.ap_
+
+# Gradle
+.gradle/
+frontend/.gradle/
+local.properties
+gradle-wrapper.jar
+
+# IDE — Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin incremental compilation
+kotlin/
+
+# ProGuard
+proguard/
+
+# ─── IDE — General ────────────────────────────────────────────────────────────
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db

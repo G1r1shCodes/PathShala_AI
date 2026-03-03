@@ -7,12 +7,12 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # AWS Bedrock
+    # Google Gemini AI (active)
+    GEMINI_API_KEY: str = ""
+
+    # AWS Bedrock (preserved for future switch-back)
     AWS_REGION: str = "ap-south-1"
     BEDROCK_MODEL_ID: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
-
-    # AWS credentials — set these in environment or .env
-    # boto3 will also pick them up from ~/.aws/credentials automatically
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
 

@@ -1,40 +1,31 @@
 """
-bedrock_service.py — AWS Bedrock integration for PathShala AI
+bedrock_service.py — AI integration for PathShala AI
+
+Now uses Google Gemini API (gemini-2.0-flash) instead of AWS Bedrock.
+Bedrock code is preserved below (commented out) for future switch-back.
 
 Handles:
   - Language detection (Hindi vs English)
   - Prompt construction (from PRD Section 10)
-  - Async Bedrock / Claude call via run_in_executor (non-blocking)
-  - WhatsApp placeholder (console print — Twilio not yet integrated)
+  - Async Gemini call via run_in_executor (non-blocking)
+  - WhatsApp delivery via Twilio SDK
 """
 
 import re
-import json
 import asyncio
-import time
 import logging
 from functools import partial
 
-import boto3
-from botocore.config import Config
+import google.generativeai as genai
 
 from config import settings
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Bedrock client (module-level singleton — boto3 clients are thread-safe)
+# Gemini client — configured once at module level (model created lazily)
 # ---------------------------------------------------------------------------
-_bedrock_config = Config(
-    region_name=settings.AWS_REGION,
-    retries={"max_attempts": 1, "mode": "standard"},
-)
-
-bedrock_client = boto3.client(
-    "bedrock-runtime",
-    region_name=settings.AWS_REGION,
-    config=_bedrock_config,
-)
+genai.configure(api_key=settings.GEMINI_API_KEY)
 
 # ---------------------------------------------------------------------------
 # System prompt — LOCKED per PRD Section 10. Do NOT modify.
@@ -90,87 +81,70 @@ def build_prompt(transcript: str) -> tuple[str, str]:
 
 
 # ---------------------------------------------------------------------------
-# Synchronous Bedrock call — run inside executor to avoid blocking
+# Synchronous Gemini call — run inside executor to avoid blocking event loop
 # ---------------------------------------------------------------------------
-def _invoke_bedrock_sync(user_message: str) -> str:
+def _invoke_gemini_sync(user_message: str) -> str:
     """
-    Blocking boto3 call. Must only be called via run_in_executor.
-    Returns the raw lesson text from Claude.
+    Blocking Gemini SDK call. Must only be called via run_in_executor.
+    Creates the model lazily (no API call at import/startup time).
+    Retries up to 3 times on ResourceExhausted, using the error's own retry_delay.
     """
-    body = {
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 400,
-        "system": SYSTEM_PROMPT,
-        "messages": [
-            {"role": "user", "content": user_message}
-        ],
-    }
+    import time
+    from google.api_core.exceptions import ResourceExhausted
 
-    response = bedrock_client.invoke_model(
-        modelId=settings.BEDROCK_MODEL_ID,
-        body=json.dumps(body),
-        contentType="application/json",
-        accept="application/json",
+    # Lazy model creation — avoids burning quota on server startup
+    model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+
+    full_prompt = f"{SYSTEM_PROMPT}\n\n---\n\n{user_message}"
+    gen_config = genai.GenerationConfig(
+        max_output_tokens=500,
+        temperature=0.7,
     )
 
-    result = json.loads(response["body"].read())
-    lesson_text = result["content"][0]["text"]
+    last_exc = None
+    for attempt in range(3):
+        try:
+            response = model.generate_content(full_prompt, generation_config=gen_config)
+            return response.text
+        except ResourceExhausted as exc:
+            last_exc = exc
+            # Parse the retry_delay seconds from gRPC error metadata if available
+            wait = 60  # safe default
+            try:
+                for detail in exc.details():
+                    if hasattr(detail, 'retry_delay'):
+                        wait = max(detail.retry_delay.seconds + 5, 10)
+                        break
+            except Exception:
+                pass
+            logger.warning(f"Gemini rate limit (attempt {attempt + 1}/3) — waiting {wait}s")
+            time.sleep(wait)
+        except Exception as exc:
+            raise exc
+
+    raise last_exc
+
+
+# ---------------------------------------------------------------------------
+# Async wrapper — the main entry point called by main.py routes
+# ---------------------------------------------------------------------------
+async def generate_lesson_from_ai(transcript: str) -> str:
+    """
+    Async lesson generation via Gemini API.
+    Off-loads the blocking SDK call to a thread pool executor.
+    Returns the raw lesson text string.
+    """
+    user_message, language = build_prompt(transcript)
+    logger.info(f"Calling Gemini | language={language} | model=gemini-2.0-flash")
+
+    loop = asyncio.get_event_loop()
+    lesson_text = await loop.run_in_executor(
+        None,
+        partial(_invoke_gemini_sync, user_message),
+    )
+
+    logger.info("Gemini call succeeded")
     return lesson_text
-
-
-# ---------------------------------------------------------------------------
-# ✅ TEMP MOCK — swap import in main.py to use this during local dev testing.
-#    No AWS credentials needed. Delete / re-comment when going live.
-# ---------------------------------------------------------------------------
-async def generate_lesson_from_ai(user_text: str) -> str:
-    """TEMP MOCK RESPONSE for development — no Bedrock call."""
-    return f"""
-📚 Class 1 Hindi — Vowels
-• Repeat after teacher: अ आ इ ई (10 min)
-• Students trace vowels in notebook (10 min)
-Tip: Use objects like apple, auto to relate sounds
-
-📚 Class 3 Math — Multiplication
-• Write table of 2 and 3 on board (10 min)
-• Students practice orally in pairs (10 min)
-Tip: Compare with counting groups of mangoes
-"""
-
-
-# ---------------------------------------------------------------------------
-# Async wrapper — wraps blocking call in executor + 20s timeout
-# (COMMENTED OUT during mock dev phase — uncomment when Bedrock is ready)
-# ---------------------------------------------------------------------------
-# async def generate_lesson_from_bedrock(transcript: str) -> dict:
-#     """
-#     Async entry point for lesson generation.
-#
-#     Uses asyncio.get_event_loop().run_in_executor() to run the boto3 call
-#     in a thread pool, keeping the event loop non-blocking.
-#
-#     Wrapped with asyncio.wait_for(..., timeout=20.0) in main.py per PRD.
-#
-#     Returns:
-#         {
-#             "lesson_text": str,
-#             "language": str   # "hi" or "en"
-#         }
-#     """
-#     user_message, language = build_prompt(transcript)
-#
-#     logger.info(f"Calling Bedrock | language={language} | model={settings.BEDROCK_MODEL_ID}")
-#
-#     loop = asyncio.get_event_loop()
-#     lesson_text = await loop.run_in_executor(
-#         None,  # default ThreadPoolExecutor
-#         partial(_invoke_bedrock_sync, user_message),
-#     )
-#
-#     logger.info("Bedrock call succeeded")
-#     return {
-#         "lesson_text": lesson_text,
-#         "language": language,
-#     }
 
 
 # ---------------------------------------------------------------------------
@@ -228,3 +202,49 @@ async def send_whatsapp(lesson_text: str, whatsapp_number: str, latency_ms: int 
         logger.info(f"WhatsApp sent to {whatsapp_number} | SID={sid}")
     except Exception as exc:
         logger.error(f"WhatsApp send failed for {whatsapp_number}: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# ── BEDROCK CODE (preserved, commented out) ──────────────────────────────
+# To switch back to Bedrock:
+#   1. pip install boto3 botocore
+#   2. Uncomment the block below
+#   3. Replace generate_lesson_from_ai with generate_lesson_from_bedrock
+# ---------------------------------------------------------------------------
+# import json
+# import boto3
+# from botocore.config import Config
+#
+# _bedrock_config = Config(
+#     region_name=settings.AWS_REGION,
+#     retries={"max_attempts": 1, "mode": "standard"},
+# )
+# bedrock_client = boto3.client(
+#     "bedrock-runtime",
+#     region_name=settings.AWS_REGION,
+#     config=_bedrock_config,
+# )
+#
+# def _invoke_bedrock_sync(user_message: str) -> str:
+#     body = {
+#         "anthropic_version": "bedrock-2023-05-31",
+#         "max_tokens": 400,
+#         "system": SYSTEM_PROMPT,
+#         "messages": [{"role": "user", "content": user_message}],
+#     }
+#     response = bedrock_client.invoke_model(
+#         modelId=settings.BEDROCK_MODEL_ID,
+#         body=json.dumps(body),
+#         contentType="application/json",
+#         accept="application/json",
+#     )
+#     result = json.loads(response["body"].read())
+#     return result["content"][0]["text"]
+#
+# async def generate_lesson_from_bedrock(transcript: str) -> dict:
+#     user_message, language = build_prompt(transcript)
+#     loop = asyncio.get_event_loop()
+#     lesson_text = await loop.run_in_executor(
+#         None, partial(_invoke_bedrock_sync, user_message)
+#     )
+#     return {"lesson_text": lesson_text, "language": language}
