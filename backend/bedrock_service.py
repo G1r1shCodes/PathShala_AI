@@ -97,7 +97,7 @@ def _invoke_gemini_sync(user_message: str) -> str:
 
     full_prompt = f"{SYSTEM_PROMPT}\n\n---\n\n{user_message}"
     gen_config = genai.GenerationConfig(
-        max_output_tokens=500,
+        max_output_tokens=2048,
         temperature=0.7,
     )
 
