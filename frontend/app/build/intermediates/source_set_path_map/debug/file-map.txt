@@ -42,9 +42,9 @@ com.pathshala.ai.app-jetified-runtime-saveable-release-40 C:\Users\giris\.gradle
 com.pathshala.ai.app-jetified-material3-release-41 C:\Users\giris\.gradle\caches\transforms-4\e9bc8424a72b710e63245e1f488f670e\transformed\jetified-material3-release\res
 com.pathshala.ai.app-jetified-ui-tooling-data-release-42 C:\Users\giris\.gradle\caches\transforms-4\ec46826a90cd9402eb6927cdb1fb0dd9\transformed\jetified-ui-tooling-data-release\res
 com.pathshala.ai.app-jetified-ui-util-release-43 C:\Users\giris\.gradle\caches\transforms-4\f3634a6b59fd478d4cd2472ea5e6c580\transformed\jetified-ui-util-release\res
-com.pathshala.ai.app-resValues-44 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\generated\res\resValues\debug
-com.pathshala.ai.app-packageDebugResources-45 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.pathshala.ai.app-packageDebugResources-46 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.pathshala.ai.app-merged_res-47 C:\Users\giris\Desktop\PathShala AI\frontend\app\build\intermediates\merged_res\debug
-com.pathshala.ai.app-debug-48 C:\Users\giris\Desktop\PathShala AI\frontend\app\src\debug\res
-com.pathshala.ai.app-main-49 C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\res
+com.pathshala.ai.app-resValues-44 C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\build\generated\res\resValues\debug
+com.pathshala.ai.app-packageDebugResources-45 C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.pathshala.ai.app-packageDebugResources-46 C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.pathshala.ai.app-merged_res-47 C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\build\intermediates\merged_res\debug
+com.pathshala.ai.app-debug-48 C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\debug\res
+com.pathshala.ai.app-main-49 C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\res

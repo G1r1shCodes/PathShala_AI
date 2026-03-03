@@ -149,17 +149,18 @@ def _parse_lesson_to_structured(lesson_text: str) -> LessonStructured:
 
     grades: list[GradeSection] = []
 
-    # Split on grade headers — lines matching "Class N" or "कक्षा N"
+    # Match "Grade N" or "Class N" etc.
     grade_header_pattern = re.compile(
-        r'^(Class\s+\d+|कक्षा\s+\d+)\s+(.+?)\s*[—–-]\s*(.+)$',
+        r'^(?:Class|Grade|कक्षा)\s+\d+\s+(.+?)\s*[—–-]\s*(.+)$',
         re.MULTILINE | re.IGNORECASE,
     )
+    # Match "• Activity 1 (15 min): " or "Activity 1 (15 min): "
     activity_pattern = re.compile(
-        r'(?:•\s*)?Activity\s*\d*\s*\((\d+)\s*min\)\s*[:\-]?\s*(.+)',
-        re.IGNORECASE,
+        r'^(?:[•*\-]\s*)?Activity\s*\d*\s*\((\d+)\s*min\)\s*[:\-]?\s*(.+)',
+        re.MULTILINE | re.IGNORECASE,
     )
-    bullet_pattern = re.compile(r'•\s*(.+?)\s*\((\d+)\s*min\)\s*[:\-]?\s*(.*)', re.IGNORECASE)
-    tip_pattern = re.compile(r'^(?:Tip|टिप्स?)\s*[:\-]\s*(.+)', re.MULTILINE | re.IGNORECASE)
+    bullet_pattern = re.compile(r'^(?:[•*\-])\s*(.+?)\s*\((\d+)\s*min\)\s*[:\-]?\s*(.*)', re.MULTILINE | re.IGNORECASE)
+    tip_pattern = re.compile(r'^(?:Tip|टिप्स?|Note)\s*[:\-]\s*(.+)', re.MULTILINE | re.IGNORECASE)
 
     headers = list(grade_header_pattern.finditer(lesson_text))
 
@@ -176,9 +177,10 @@ def _parse_lesson_to_structured(lesson_text: str) -> LessonStructured:
         ])
 
     for i, match in enumerate(headers):
-        grade_name = match.group(1).strip()
-        subject = match.group(2).strip()
-        topic = match.group(3).strip()
+        # Fallback if the header is just "Class 1" without subject/topic
+        grade_name = match.group(0).split('—')[0].split('-')[0].strip()
+        subject = match.group(1).strip() if match.lastindex >= 1 else "General"
+        topic = match.group(2).strip() if match.lastindex >= 2 else "Lesson"
 
         # Extract the block of text for this grade section
         start = match.end()
@@ -267,14 +269,17 @@ async def generate_lesson(request: LessonRequest, background_tasks: BackgroundTa
         )
 
     # Parse the raw text into structured JSON required by Android app
-    language = "hi" if "hi-IN" in lesson else "en" # Basic mock language detection for now or we could use detect_language here, but Android expects 'hi'/'en'
+    language = "hi" if "hi-IN" in lesson else "en" 
     lesson_structured = _parse_lesson_to_structured(lesson)
+
+    # Use model_dump() for Pydantic v2 to ensure nested models are serialized
+    struct_dict = lesson_structured.model_dump() if hasattr(lesson_structured, 'model_dump') else lesson_structured.dict()
 
     return {
         "success": True,
         "language": language,
         "lesson_text": lesson,
-        "lesson_structured": lesson_structured.dict(),
+        "lesson_structured": struct_dict,
         "latency_ms": latency_ms
     }
 
