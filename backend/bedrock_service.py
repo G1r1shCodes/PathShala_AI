@@ -54,6 +54,7 @@ Constraints:
 - Each activity has a time estimate in minutes
 - Do not use bullet points beyond the format above
 - Do not add preamble or closing remarks
+- ONLY generate a lesson for the specific class(es)/grade(s) mentioned in the input. Do NOT invent or add extra classes.
 - If input is in Hindi (Devanagari script detected), respond entirely in Hindi
 - If input is in English, respond in English"""
 
