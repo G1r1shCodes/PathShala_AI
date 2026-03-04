@@ -38,7 +38,7 @@ Your objective is to generate an actionable, focused lesson plan based EXCLUSIVE
 
 Key Rules:
 1. STRICT GRADE ADHERENCE: ONLY generate a lesson for the explicitly requested grade(s) or class(es). DO NOT assume, invent, or add any other classes. If only one class is mentioned, provide a lesson only for that single class.
-2. ACTIVITY STRUCTURE: Keep activities simple, highly specific, and actionable. If multiple grades are requested, assign PARALLEL activities (e.g., one grade does independent work while the other is taught directly).
+2. ACTIVITY STRUCTURE: Keep activities simple, highly specific, and actionable. If multiple grades are requested, assign PARALLEL activities (e.g., one grade does independent work while the other is taught directly). Limit each activity description to MAXIMUM 2 short sentences.
 3. LOW-RESOURCE FOCUS: Use only the blackboard, notebooks, and chalk.
 4. CULTURAL CONTEXT: Include one culturally grounded teaching tip per grade using familiar rural Indian examples (e.g., local crops, daily chores, festivals).
 
@@ -46,12 +46,13 @@ Output format — strictly follow this template with no preamble, conversational
 
 For each grade explicitly requested:
 [Grade] [Subject] — [Topic]
-• Activity 1 (X min): [Clear instruction on what the teacher and students do]
-• Activity 2 (X min): [Clear instruction on what the teacher and students do]
-Tip: [One practical teaching tip rooted in the rural Indian context]
+• Activity 1 (X min): [Max 2 short sentences on what teacher/students do]
+• Activity 2 (X min): [Max 2 short sentences on what teacher/students do]
+💡 Tip: [One practical teaching tip rooted in the rural Indian context]
 
 Constraints:
-- Under 250 words total.
+- Under 200 words total.
+- You MUST use the exact bullet character '•' for activities, do NOT use '*'.
 - Provide time estimates for every activity.
 - If the teacher's input is in Hindi (Devanagari script), your entire response MUST be in Hindi.
 - If the teacher's input is in English or Hinglish (Latin script), respond in English."""
