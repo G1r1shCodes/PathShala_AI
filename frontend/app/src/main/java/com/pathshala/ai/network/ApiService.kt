@@ -17,7 +17,7 @@ interface ApiService {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "https://gregoria-transelemental-unneedfully.ngrok-free.dev/"
+    private const val BASE_URL = "https://pathshala-ai.onrender.com/"
 
     val instance: ApiService by lazy {
         val logging = HttpLoggingInterceptor().apply {
