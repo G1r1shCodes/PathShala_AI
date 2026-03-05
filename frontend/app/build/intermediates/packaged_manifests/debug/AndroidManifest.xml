@@ -24,7 +24,8 @@
         android:extractNativeLibs="false"
         android:label="PathShala AI"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:supportsRtl="true" >
+        android:supportsRtl="true"
+        android:testOnly="true" >
         <activity
             android:name="com.pathshala.ai.MainActivity"
             android:exported="true"
