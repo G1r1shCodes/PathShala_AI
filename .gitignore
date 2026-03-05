@@ -83,3 +83,6 @@ npm-debug.log*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+
+# ─── Local Documentation ──────────────────────────────────────────────────────
+*PRD*.md

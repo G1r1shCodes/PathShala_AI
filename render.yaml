@@ -16,7 +16,7 @@ services:
       - key: TWILIO_WHATSAPP_FROM
         value: "+14155238886"
       - key: TWILIO_WHATSAPP_TO
-        value: "+916369631956"
+        sync: false
       - key: APP_ENV
         value: production
       - key: PYTHON_VERSION
