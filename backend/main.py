@@ -410,6 +410,7 @@ async def call_webhook():
     include_in_schema=True,
 )
 async def call_webhook_respond(
+    background_tasks: BackgroundTasks,
     SpeechResult: Optional[str] = Form(default=None),
     Confidence: Optional[str] = Form(default=None),
     CallSid: Optional[str] = Form(default=None),
@@ -461,4 +462,9 @@ async def call_webhook_respond(
         ))
 
     logger.info(f"Lesson generated for call | lang={tts_lang} | CallSid={CallSid}")
+    
+    # Send WhatsApp concurrently as a background task
+    demo_number = settings.TWILIO_WHATSAPP_NUMBER or "+919999999999" # Falls back if not set in env
+    background_tasks.add_task(send_whatsapp, lesson, demo_number, 0)
+
     return _twiml_response(_twiml_say(lesson, tts_lang))

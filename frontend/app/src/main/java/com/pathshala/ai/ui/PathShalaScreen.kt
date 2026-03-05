@@ -339,6 +339,14 @@ fun LessonCard(lesson: LessonResponse, onPlayClick: () -> Unit) {
                 )
             }
 
+            // WhatsApp confirmation text
+            Text(
+                text = "📲 Lesson sent to WhatsApp",
+                fontSize = 13.sp,
+                color = Color(0xFF2E7D32),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
             Spacer(Modifier.height(24.dp))
 
             Button(
