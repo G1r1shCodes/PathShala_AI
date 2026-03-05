@@ -347,7 +347,7 @@ def _twiml_gather(prompt: str, action: str, language: str = "hi-IN", retries: in
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
         f'<Gather input="speech" action="{action}" method="POST" '
-        f'language="{language}" speechTimeout="3" timeout="8">'
+        f'language="{language}" speechTimeout="5" timeout="15">'
         f'<Say language="{language}">{prompt}</Say>'
         "</Gather>"
         # If Gather times out with no speech, fall through to retry or end
@@ -395,7 +395,7 @@ async def call_webhook():
     twiml = _twiml_gather(
         prompt="Namaste! Please speak your lesson request in Hindi or English. For example — Class 1 vowels aur Class 3 multiplication.",
         action="/call-webhook/respond",
-        language="en-US",  # Use English STT — detect_language() handles Hindi/English from transcript content
+        language="hi-IN",  # Use Hindi STT by default to capture Devanagari accurately
     )
     return _twiml_response(twiml)
 
@@ -432,7 +432,7 @@ async def call_webhook_respond(
         twiml = _twiml_gather(
             prompt="Sorry, I did not catch that. Please tell me your lesson request — for example, Class 1 vowels and Class 3 multiplication.",
             action="/call-webhook/respond",
-            language="en-US",
+            language="hi-IN",
         )
         return _twiml_response(twiml)
 
@@ -441,6 +441,7 @@ async def call_webhook_respond(
     tts_lang  = "hi-IN" if lang_code == "hi" else "en-US"
 
     # — Generate lesson (mock or Bedrock) —
+    start_ms = time.monotonic()
     try:
         lesson = await asyncio.wait_for(
             generate_lesson_from_ai(SpeechResult),
@@ -461,10 +462,11 @@ async def call_webhook_respond(
             tts_lang,
         ))
 
-    logger.info(f"Lesson generated for call | lang={tts_lang} | CallSid={CallSid}")
+    latency_ms = int((time.monotonic() - start_ms) * 1000)
+    logger.info(f"Lesson generated for call | lang={tts_lang} | CallSid={CallSid} | latency_ms={latency_ms}")
     
     # Send WhatsApp concurrently as a background task
     demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956" # Falls back if not set in env
-    background_tasks.add_task(send_whatsapp, lesson, demo_number, 0)
+    background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
     return _twiml_response(_twiml_say(lesson, tts_lang))
