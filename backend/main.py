@@ -529,17 +529,27 @@ async def call_webhook_respond(
     demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956"
     background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
-    # Use Amazon Polly for natural Hindi/English TTS — generate audio and play via S3 URL
+    # Use Amazon Polly for natural Hindi/English TTS
+    # The presigned S3 URL contains & characters that must be XML-escaped as &amp;
+    # in TwiML — without this the XML is malformed and Twilio silently drops <Play>
+    from html import escape as xml_escape
     try:
-        audio_url = await generate_polly_audio(lesson, lang_code)
+        audio_url = await asyncio.wait_for(
+            generate_polly_audio(lesson, lang_code),
+            timeout=5.0
+        )
+        safe_url = xml_escape(audio_url)  # & → &amp; for valid XML
         logger.info(f"Polly audio ready | url={audio_url[:60]}...")
         twiml = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
-            f'<Play>{audio_url}</Play>'
+            f"<Play>{safe_url}</Play>"
             "</Response>"
         )
         return _twiml_response(twiml)
+    except asyncio.TimeoutError:
+        logger.warning("Polly timed out — falling back to <Say>")
+        return _twiml_response(_twiml_say(lesson, tts_lang))
     except Exception as e:
-        logger.warning(f"Polly failed, falling back to <Say>: {e}")
+        logger.warning(f"Polly failed — falling back to <Say>: {e}")
         return _twiml_response(_twiml_say(lesson, tts_lang))
