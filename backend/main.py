@@ -507,75 +507,82 @@ async def call_webhook():
 
 @app.post(
     "/call-webhook/respond",
-    summary="Twilio Voice respond — receive speech, generate lesson, read aloud.",
+    summary="Twilio Voice respond — acknowledge speech and redirect.",
     include_in_schema=True,
 )
 async def call_webhook_respond(
-    background_tasks: BackgroundTasks,
     SpeechResult: Optional[str] = Form(default=None),
-    Confidence: Optional[str] = Form(default=None),
     CallSid: Optional[str] = Form(default=None),
 ):
     """
     Step 2 of the call flow.
-    Receives the transcribed speech from Twilio Gather.
-    Passes it through generate_lesson_from_ai(), returns TwiML <Say>.
-
-    If SpeechResult is empty — re-prompt the caller (max 2 natural retries
-    are handled by Twilio's Gather retry loop via the action URL).
+    Immediately acknowledge to bypass the 15-second limit, then redirect to heavy processing.
     """
-    logger.info(f"call-webhook/respond | CallSid={CallSid} | Confidence={Confidence}")
-    logger.info(f"SpeechResult: {SpeechResult!r}")
+    logger.info(f"call-webhook/respond | CallSid={CallSid} | SpeechResult={SpeechResult!r}")
 
-    # — Empty speech: ask again —
     if not SpeechResult or not SpeechResult.strip():
         logger.warning("Empty SpeechResult — re-prompting caller")
         twiml = _twiml_gather(
-            prompt="Sorry, I did not catch that. Please tell me your lesson request — for example, Class 1 vowels and Class 3 multiplication.",
+            prompt="Sorry, I did not catch that. Please tell me your lesson request.",
             action="/call-webhook/respond",
             language="hi-IN",
         )
         return _twiml_response(twiml)
 
-    # — Detect language for correct TTS voice —
-    lang_code = detect_language(SpeechResult)          # "hi" or "en"
+    # Acknowledge immediately to reset Twilio's clock
+    import urllib.parse
+    safe_speech = urllib.parse.quote(SpeechResult)
+    lang_code = detect_language(SpeechResult)
+    tts_lang = "hi-IN" if lang_code == "hi" else "en-US"
+    wait_msg = "Ek minute, main lesson plan taiyaar kar rahi hoon..." if lang_code == "hi" else "Please wait a moment while I prepare the lesson..."
+    
+    twiml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        "<Response>"
+        f'<Say language="{tts_lang}">{wait_msg}</Say>'
+        f'<Redirect method="GET">/call-webhook/process?speech={safe_speech}&amp;call_sid={CallSid}</Redirect>'
+        "</Response>"
+    )
+    return _twiml_response(twiml)
+
+# ---------------------------------------------------------------------------
+# GET /call-webhook/process  — The heavy lifting (Bedrock + Polly)
+# ---------------------------------------------------------------------------
+@app.get(
+    "/call-webhook/process",
+    summary="Generate AI lesson and read it out (Long running)",
+)
+async def call_webhook_process(
+    background_tasks: BackgroundTasks,
+    speech: str,
+    call_sid: str = "",
+):
+    SpeechResult = speech
+    lang_code = detect_language(SpeechResult)
     tts_lang  = "hi-IN" if lang_code == "hi" else "en-US"
 
-    # — Generate lesson (Bedrock -> Gemini) —
     start_ms = time.monotonic()
     try:
         curriculum_context = get_curriculum_context(SpeechResult)
         result = await asyncio.wait_for(
             generate_lesson_from_ai(SpeechResult, curriculum_context),
-            timeout=20.0,
+            timeout=14.0, # We have 15 seconds from Redirect
         )
         lesson = result["lesson_text"]
     except asyncio.TimeoutError:
         logger.error("Lesson generation timed out for call")
-        error_msg = (
-            "Maafi chahte hain, thoda time lag raha hai. Dobara call karein."
-            if tts_lang == "hi-IN"
-            else "Sorry, lesson generation timed out. Please call again."
-        )
+        error_msg = "Maafi chahte hain, thoda time lag raha hai. Kripaya dobara call karein." if tts_lang == "hi-IN" else "Sorry, lesson generation timed out. Please call again."
         return _twiml_response(_twiml_say(error_msg, tts_lang))
     except Exception as exc:
         logger.exception(f"Lesson generation failed for call: {exc}")
-        return _twiml_response(_twiml_say(
-            "Kuch gadbad ho gayi. Kripaya dobara call karein.",
-            tts_lang,
-        ))
+        return _twiml_response(_twiml_say("Kuch gadbad ho gayi. Kripaya dobara call karein.", tts_lang))
 
     latency_ms = int((time.monotonic() - start_ms) * 1000)
-    logger.info(f"Lesson generated for call | lang={tts_lang} | CallSid={CallSid} | latency_ms={latency_ms}")
     
-    # Save to DynamoDB
     background_tasks.add_task(save_lesson_to_dynamo, SpeechResult, lesson, lang_code, "call")
-
-    # Send WhatsApp concurrently as a background task
     demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956" 
     background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
-    # Polly Audio for TwiML <Play> instead of basic <Say>
     try:
         audio_url = await generate_polly_audio(lesson, lang_code)
         twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Play>{audio_url}</Play></Response>'
