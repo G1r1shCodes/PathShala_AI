@@ -156,7 +156,7 @@ fun PathShalaScreen(
                 fontSize = 14.sp,
                 fontWeight = if (uiState is UiState.Listening) FontWeight.Bold else FontWeight.Normal
             )
-            
+
             if (uiState !is UiState.Listening && uiState !is UiState.Processing) {
                 Text(
                     "ya yahan type karein",
@@ -184,7 +184,7 @@ fun PathShalaScreen(
             // ── Success: Lesson Card ──────────────────────────────────────────────
             AnimatedVisibility(
                 visible = uiState is UiState.Success,
-                enter = slideInVertically { it / 2 } + fadeIn()
+                enter = fadeIn() + expandVertically()
             ) {
                 val lesson = (uiState as? UiState.Success)?.lesson
                 if (lesson != null) {
