@@ -507,16 +507,17 @@ async def call_webhook():
 
 @app.post(
     "/call-webhook/respond",
-    summary="Twilio Voice respond — acknowledge speech and redirect.",
+    summary="Twilio Voice respond — receive speech, generate lesson, read aloud.",
     include_in_schema=True,
 )
 async def call_webhook_respond(
+    background_tasks: BackgroundTasks,
     SpeechResult: Optional[str] = Form(default=None),
     CallSid: Optional[str] = Form(default=None),
 ):
     """
-    Step 2: Acknowledge immediately to avoid Twilio's 15s timeout,
-    then redirect to the processing endpoint.
+    Single-step processing: receive speech, generate lesson, and read it back.
+    Must complete within Twilio's 15-second webhook timeout.
     """
     logger.info(f"call-webhook/respond | CallSid={CallSid} | SpeechResult={SpeechResult!r}")
 
@@ -529,39 +530,6 @@ async def call_webhook_respond(
         )
         return _twiml_response(twiml)
 
-    # Store speech in memory keyed by CallSid for retrieval by the process endpoint
-    _pending_speeches[CallSid or "default"] = SpeechResult
-
-    wait_msg = "Please wait while I prepare your lesson plan."
-    twiml = (
-        '<?xml version="1.0" encoding="UTF-8"?>'
-        "<Response>"
-        f'<Say language="en-US">{wait_msg}</Say>'
-        f'<Redirect method="POST">/call-webhook/process</Redirect>'
-        "</Response>"
-    )
-    return _twiml_response(twiml)
-
-# In-memory store for pending speech texts (keyed by CallSid)
-_pending_speeches: dict[str, str] = {}
-
-# ---------------------------------------------------------------------------
-# POST /call-webhook/process  — The heavy lifting (AI generation)
-# ---------------------------------------------------------------------------
-@app.post(
-    "/call-webhook/process",
-    summary="Generate AI lesson and read it out.",
-)
-async def call_webhook_process(
-    background_tasks: BackgroundTasks,
-    CallSid: Optional[str] = Form(default=None),
-):
-    # Retrieve the speech from memory
-    SpeechResult = _pending_speeches.pop(CallSid or "default", None)
-    if not SpeechResult:
-        logger.error(f"No pending speech found for CallSid={CallSid}")
-        return _twiml_response(_twiml_say("Sorry, something went wrong. Please call again.", "en-US"))
-
     lang_code = detect_language(SpeechResult)
     tts_lang  = "hi-IN" if lang_code == "hi" else "en-US"
 
@@ -570,7 +538,7 @@ async def call_webhook_process(
         curriculum_context = get_curriculum_context(SpeechResult)
         result = await asyncio.wait_for(
             generate_lesson_from_ai(SpeechResult, curriculum_context),
-            timeout=13.0,
+            timeout=14.0,
         )
         lesson = result["lesson_text"]
     except asyncio.TimeoutError:
@@ -587,5 +555,5 @@ async def call_webhook_process(
     demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956" 
     background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
-    # Use Twilio's built-in <Say> TTS directly — instant response
+    # Use Twilio's built-in <Say> TTS — instant, no extra network overhead
     return _twiml_response(_twiml_say(lesson, tts_lang))
