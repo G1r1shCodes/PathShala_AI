@@ -385,32 +385,6 @@ async def get_lesson_history():
         return {"lessons": [], "count": 0}
 
 
-# ---------------------------------------------------------------------------
-# Original full-schema route (COMMENTED OUT — restore when Bedrock is live)
-# ---------------------------------------------------------------------------
-# @app.post("/generate-lesson-full", response_model=LessonResponse)
-# async def generate_lesson_full(request: LessonRequest, background_tasks: BackgroundTasks):
-#     start_ms = time.monotonic()
-#     try:
-#         bedrock_result = await asyncio.wait_for(
-#             generate_lesson_from_bedrock(request.transcript),
-#             timeout=20.0,
-#         )
-#     except asyncio.TimeoutError:
-#         raise HTTPException(status_code=504, detail={"success": False, "error": "LLM_TIMEOUT",
-#             "message": "Lesson generation timed out. Please try again.", "fallback_lesson": None})
-#     except Exception as exc:
-#         raise HTTPException(status_code=500, detail={"success": False, "error": "BEDROCK_ERROR",
-#             "message": str(exc), "fallback_lesson": None})
-#     lesson_text = bedrock_result["lesson_text"]
-#     language = bedrock_result["language"]
-#     lesson_structured = _parse_lesson_to_structured(lesson_text)
-#     latency_ms = int((time.monotonic() - start_ms) * 1000)
-#     if request.whatsapp_number:
-#         background_tasks.add_task(send_whatsapp_placeholder, lesson_text, request.whatsapp_number, language)
-#     return LessonResponse(success=True, language=language, lesson_text=lesson_text,
-#         lesson_structured=lesson_structured, latency_ms=latency_ms)
-
 
 # ---------------------------------------------------------------------------
 # GET /health
@@ -550,10 +524,22 @@ async def call_webhook_respond(
 
     latency_ms = int((time.monotonic() - start_ms) * 1000)
     logger.info(f"Lesson generated for call | latency={latency_ms}ms | CallSid={CallSid}")
-    
+
     background_tasks.add_task(save_lesson_to_dynamo, SpeechResult, lesson, lang_code, "call")
-    demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956" 
+    demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956"
     background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
-    # Use Twilio's built-in <Say> TTS — instant, no extra network overhead
-    return _twiml_response(_twiml_say(lesson, tts_lang))
+    # Use Amazon Polly for natural Hindi/English TTS — generate audio and play via S3 URL
+    try:
+        audio_url = await generate_polly_audio(lesson, lang_code)
+        logger.info(f"Polly audio ready | url={audio_url[:60]}...")
+        twiml = (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            "<Response>"
+            f'<Play>{audio_url}</Play>'
+            "</Response>"
+        )
+        return _twiml_response(twiml)
+    except Exception as e:
+        logger.warning(f"Polly failed, falling back to <Say>: {e}")
+        return _twiml_response(_twiml_say(lesson, tts_lang))

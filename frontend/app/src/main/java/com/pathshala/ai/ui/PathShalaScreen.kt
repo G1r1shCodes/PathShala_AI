@@ -149,8 +149,8 @@ fun PathShalaScreen(
             Text(
                 when (uiState) {
                     is UiState.Listening   -> "🔴 सुन रहा हूँ... / Listening..."
-                    is UiState.Processing  -> "Generating lesson plan..."
-                    else                   -> "🎤 TAP TO SPEAK"
+                    is UiState.Processing  -> "⚙️ तैयार हो रहा है... / Processing..."
+                    else                   -> "🎤 बोलने के लिए दबाएँ / Tap to speak"
                 },
                 color = if (uiState is UiState.Listening) Color.Red else TextMuted,
                 fontSize = 14.sp,
@@ -184,7 +184,7 @@ fun PathShalaScreen(
             // ── Success: Lesson Card ──────────────────────────────────────────────
             AnimatedVisibility(
                 visible = uiState is UiState.Success,
-                enter = fadeIn() + expandVertically()
+                enter = slideInVertically { it / 2 } + fadeIn()
             ) {
                 val lesson = (uiState as? UiState.Success)?.lesson
                 if (lesson != null) {
@@ -348,13 +348,36 @@ fun LessonCard(lesson: LessonResponse, onPlayClick: () -> Unit) {
                 )
             }
 
-            // WhatsApp confirmation text
-            Text(
-                text = "📲 Sent to WhatsApp",
-                fontSize = 13.sp,
-                color = Color(0xFF2E7D32),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            // WhatsApp automatic delivery confirmation badge
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+                    .background(Color(0xFFE8F5E9), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = Color(0xFF2E7D32),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text(
+                        "📲 WhatsApp पर भेजा गया",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1B5E20)
+                    )
+                    Text(
+                        "Lesson delivered automatically",
+                        fontSize = 11.sp,
+                        color = Color(0xFF388E3C)
+                    )
+                }
+            }
 
             Spacer(Modifier.height(24.dp))
 
