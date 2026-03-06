@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # Clients Configuration
 # ---------------------------------------------------------------------------
 genai.configure(api_key=settings.GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+gemini_model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
 _bedrock_config = Config(
     region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1"),
