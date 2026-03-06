@@ -531,7 +531,7 @@ async def call_webhook_respond(
 
     # Acknowledge immediately to reset Twilio's clock
     import urllib.parse
-    safe_speech = urllib.parse.quote(SpeechResult)
+    safe_speech = urllib.parse.quote_plus(SpeechResult)
     lang_code = detect_language(SpeechResult)
     tts_lang = "hi-IN" if lang_code == "hi" else "en-US"
     wait_msg = "Ek minute, main lesson plan taiyaar kar rahi hoon..." if lang_code == "hi" else "Please wait a moment while I prepare the lesson..."
@@ -557,7 +557,8 @@ async def call_webhook_process(
     speech: str,
     call_sid: str = "",
 ):
-    SpeechResult = speech
+    import urllib.parse
+    SpeechResult = urllib.parse.unquote_plus(speech)
     lang_code = detect_language(SpeechResult)
     tts_lang  = "hi-IN" if lang_code == "hi" else "en-US"
 
@@ -566,7 +567,7 @@ async def call_webhook_process(
         curriculum_context = get_curriculum_context(SpeechResult)
         result = await asyncio.wait_for(
             generate_lesson_from_ai(SpeechResult, curriculum_context),
-            timeout=14.0, # We have 15 seconds from Redirect
+            timeout=25.0, # Now we have a fresh Twilio connection, so we can use a longer timeout!
         )
         lesson = result["lesson_text"]
     except asyncio.TimeoutError:
