@@ -88,6 +88,10 @@ s3_client = boto3.client(
 
 NCERT_DATA = {}
 
+# In-memory store for pending speech — keyed by CallSid
+# Allows /call-webhook/respond to immediately ack and redirect to /call-webhook/generate
+_pending_speech: dict = {}
+
 @app.on_event("startup")
 async def load_curriculum():
     """Fetch NCERT JSON from S3 at startup."""
@@ -468,9 +472,9 @@ async def call_webhook():
     """
     logger.info("Incoming call — opening Gather")
     twiml = _twiml_gather(
-        prompt="Namaste! Please speak your lesson request. For example, Class 5 solar system, or Class 3 multiplication.",
+        prompt="Namaste! Aaj ka lesson request boliye. Jaise — Class 3 multiplication, ya Class 5 plants.",
         action="/call-webhook/respond",
-        language="en-IN",  # Use Indian English STT — handles English and Hinglish properly
+        language="hi-IN",  # Hindi STT — returns Devanagari so detect_language works correctly
     )
     return _twiml_response(twiml)
 
@@ -481,28 +485,74 @@ async def call_webhook():
 
 @app.post(
     "/call-webhook/respond",
-    summary="Twilio Voice respond — receive speech, generate lesson, read aloud.",
+    summary="Twilio Voice respond — immediately acknowledge speech and redirect to generate.",
     include_in_schema=True,
 )
 async def call_webhook_respond(
-    background_tasks: BackgroundTasks,
     SpeechResult: Optional[str] = Form(default=None),
     CallSid: Optional[str] = Form(default=None),
 ):
     """
-    Single-step processing: receive speech, generate lesson, and read it back.
-    Must complete within Twilio's 15-second webhook timeout.
+    Step 2 of call flow: receive speech, instantly play a wait message,
+    store the transcript, and redirect to /call-webhook/generate.
+    This eliminates dead silence during AI generation.
     """
     logger.info(f"call-webhook/respond | CallSid={CallSid} | SpeechResult={SpeechResult!r}")
 
     if not SpeechResult or not SpeechResult.strip():
         logger.warning("Empty SpeechResult — re-prompting caller")
         twiml = _twiml_gather(
-            prompt="Sorry, I did not catch that. Please tell me your lesson request.",
+            prompt="Kripaya apna lesson request boliye.",
             action="/call-webhook/respond",
-            language="en-IN",
+            language="hi-IN",
         )
         return _twiml_response(twiml)
+
+    # Store speech so /call-webhook/generate can retrieve it via CallSid
+    _pending_speech[CallSid] = SpeechResult
+
+    # Detect language now so the wait message matches what the teacher spoke
+    lang_code = detect_language(SpeechResult)
+    if lang_code == "hi":
+        wait_msg = "आपका lesson plan तैयार हो रहा है। कृपया कुछ क्षण प्रतीक्षा करें।"
+        wait_lang = "hi-IN"
+    else:
+        wait_msg = "Your lesson plan is being prepared. Please wait a moment."
+        wait_lang = "en-IN"
+
+    # Immediately acknowledge — teacher hears this instead of silence
+    twiml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<Response>'
+        f'<Say language="{wait_lang}">{wait_msg}</Say>'
+        '<Redirect method="POST">/call-webhook/generate</Redirect>'
+        '</Response>'
+    )
+    return _twiml_response(twiml)
+
+
+# ---------------------------------------------------------------------------
+# POST /call-webhook/generate — AI generation step (called via Twilio Redirect)
+# ---------------------------------------------------------------------------
+
+@app.post(
+    "/call-webhook/generate",
+    summary="Generate lesson and read it back via Polly or <Say>.",
+    include_in_schema=True,
+)
+async def call_webhook_generate(
+    background_tasks: BackgroundTasks,
+    CallSid: Optional[str] = Form(default=None),
+):
+    """
+    Step 3 of call flow: retrieve stored speech, generate lesson, play result.
+    Called by Twilio after /call-webhook/respond redirects here.
+    """
+    SpeechResult = _pending_speech.pop(CallSid, "")
+    logger.info(f"call-webhook/generate | CallSid={CallSid} | SpeechResult={SpeechResult!r}")
+
+    if not SpeechResult:
+        return _twiml_response(_twiml_say("Koi lesson request nahi mili. Kripaya dobara call karein.", "hi-IN"))
 
     lang_code = detect_language(SpeechResult)
     tts_lang  = "hi-IN" if lang_code == "hi" else "en-US"
@@ -517,28 +567,26 @@ async def call_webhook_respond(
         lesson = result["lesson_text"]
     except asyncio.TimeoutError:
         logger.error("Lesson generation timed out for call")
-        return _twiml_response(_twiml_say("Sorry, lesson generation is taking too long. Please call again.", "en-US"))
+        return _twiml_response(_twiml_say("Lesson taiyar hone mein bahut time lag raha hai. Kripaya dobara call karein.", "hi-IN"))
     except Exception as exc:
         logger.exception(f"Lesson generation failed for call: {exc}")
-        return _twiml_response(_twiml_say("Sorry, something went wrong. Please call again.", "en-US"))
+        return _twiml_response(_twiml_say("Kuch galat ho gaya. Kripaya dobara call karein.", "hi-IN"))
 
     latency_ms = int((time.monotonic() - start_ms) * 1000)
     logger.info(f"Lesson generated for call | latency={latency_ms}ms | CallSid={CallSid}")
 
-    background_tasks.add_task(save_lesson_to_dynamo, SpeechResult, lesson, lang_code, "call")
     demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956"
+    background_tasks.add_task(save_lesson_to_dynamo, SpeechResult, lesson, lang_code, "call")
     background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
-    # Use Amazon Polly for natural Hindi/English TTS
-    # The presigned S3 URL contains & characters that must be XML-escaped as &amp;
-    # in TwiML — without this the XML is malformed and Twilio silently drops <Play>
+    # Use Amazon Polly — presigned URL & must be XML-escaped as &amp; in TwiML
     from html import escape as xml_escape
     try:
         audio_url = await asyncio.wait_for(
             generate_polly_audio(lesson, lang_code),
             timeout=5.0
         )
-        safe_url = xml_escape(audio_url)  # & → &amp; for valid XML
+        safe_url = xml_escape(audio_url)
         logger.info(f"Polly audio ready | url={audio_url[:60]}...")
         twiml = (
             '<?xml version="1.0" encoding="UTF-8"?>'
