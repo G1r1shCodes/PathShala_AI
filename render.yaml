@@ -9,6 +9,18 @@ services:
     envVars:
       - key: GEMINI_API_KEY
         sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: ap-south-1
+      - key: BEDROCK_MODEL_ID
+        value: anthropic.claude-3-5-sonnet-20241022-v2:0
+      - key: S3_BUCKET_NAME
+        value: pathshala-curriculum-unique-name-1234
+      - key: DYNAMODB_TABLE_NAME
+        value: pathshala-lessons
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
