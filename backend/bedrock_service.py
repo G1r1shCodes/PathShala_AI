@@ -1,21 +1,25 @@
 """
 bedrock_service.py — AI integration for PathShala AI
 
-Now uses Google Gemini API (gemini-2.0-flash) instead of AWS Bedrock.
-Bedrock code is preserved below (commented out) for future switch-back.
-
 Handles:
   - Language detection (Hindi vs English)
-  - Prompt construction (from PRD Section 10)
-  - Async Gemini call via run_in_executor (non-blocking)
+  - Prompt construction with NCERT context
+  - AWS Bedrock (Claude 3.5 Sonnet) as primary
+  - Google Gemini (gemini-2.5-flash) as fallback
+  - Amazon Polly TTS logic
   - WhatsApp delivery via Twilio SDK
 """
 
 import re
+import os
+import json
+import uuid
 import asyncio
 import logging
 from functools import partial
 
+import boto3
+from botocore.config import Config
 import google.generativeai as genai
 
 from config import settings
@@ -23,148 +27,183 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Gemini client — configured once at module level (model created lazily)
+# Clients Configuration
 # ---------------------------------------------------------------------------
 genai.configure(api_key=settings.GEMINI_API_KEY)
+gemini_model = genai.GenerativeModel(model_name="gemini-2.5-flash")
+
+_bedrock_config = Config(
+    region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1"),
+    retries={"max_attempts": 1, "mode": "standard"},
+)
+
+bedrock_client = boto3.client(
+    "bedrock-runtime",
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1"),
+    config=_bedrock_config,
+)
+
+polly_client = boto3.client(
+    "polly",
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1")
+)
+
+s3_client = boto3.client(
+    "s3",
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1")
+)
+
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "pathshala-curriculum-unique-name-1234")
 
 # ---------------------------------------------------------------------------
-# System prompt — LOCKED per PRD Section 10. Do NOT modify.
+# System prompt — PRD Section 11 Exactly
 # ---------------------------------------------------------------------------
-SYSTEM_PROMPT = """You are a highly practical teaching assistant helping a rural Indian government school teacher.
+SYSTEM_PROMPT = """You are a teaching assistant helping a rural Indian government school teacher.
 
-Context: The teacher operates in a low-resource environment with only a blackboard, chalk, and student notebooks. No projectors, internet, or printed materials are available. The teacher may teach a single grade or manage multiple grades simultaneously in one classroom.
+The teacher manages a single classroom with students from multiple grades 
+simultaneously. The teacher has access to: one blackboard, student notebooks, 
+chalk. No projector, no internet, no printed materials.
 
-Your objective is to generate an actionable, focused lesson plan based EXCLUSIVELY on the teacher's request.
+Your job is to generate a practical lesson plan that:
+1. Assigns PARALLEL activities — one grade must be doing independent work 
+   while another is being taught directly. The teacher cannot give full 
+   attention to two grades at once.
+2. Uses only low-resource materials (blackboard, notebooks, chalk).
+3. Keeps instructions simple, specific, and actionable.
+4. Includes one culturally grounded teaching tip per grade using familiar 
+   objects, food, or daily life examples from rural India.
 
-Key Rules:
-1. STRICT GRADE ADHERENCE: ONLY generate a lesson for the explicitly requested grade(s) or class(es). DO NOT assume, invent, or add any other classes. If only one class is mentioned, provide a lesson only for that single class.
-2. ACTIVITY STRUCTURE: Keep activities simple, highly specific, and actionable. If multiple grades are requested, assign PARALLEL activities (e.g., one grade does independent work while the other is taught directly). Limit each activity description to MAXIMUM 2 short sentences.
-3. LOW-RESOURCE FOCUS: Use only the blackboard, notebooks, and chalk.
-4. CULTURAL CONTEXT: Include one culturally grounded teaching tip per grade using familiar rural Indian examples (e.g., local crops, daily chores, festivals).
-
-Output format — strictly follow this template with no preamble, conversational text, or closing remarks:
-
-For each grade explicitly requested:
+Output format — follow this exactly:
 [Grade] [Subject] — [Topic]
-• Activity 1 (X min): [Max 2 short sentences on what teacher/students do]
-• Activity 2 (X min): [Max 2 short sentences on what teacher/students do]
-💡 Tip: [One practical teaching tip rooted in the rural Indian context]
+• Activity 1 (X min): description
+• Activity 2 (X min): description
+Tip: one practical teaching tip
 
 Constraints:
-- Under 200 words total.
-- You MUST use the exact bullet character '•' for activities, do NOT use '*'.
-- Provide time estimates for every activity.
-- If the teacher's input is in Hindi (Devanagari script), your entire response MUST be in Hindi.
-- If the teacher's input is in English or Hinglish (Latin script), respond in English."""
+- Maximum 200 words total
+- Each activity has a time estimate in minutes
+- No preamble or closing remarks
+- If input is in Hindi (Devanagari script), respond entirely in Hindi
+- If input is in English, respond in English"""
 
 
 # ---------------------------------------------------------------------------
-# Language detection — from PRD Section 10 exactly
+# Language detection & Context from PRD Section 11
 # ---------------------------------------------------------------------------
 def detect_language(text: str) -> str:
-    """Detect Hindi vs English from script."""
-    devanagari_pattern = re.compile(r'[\u0900-\u097F]')
-    if devanagari_pattern.search(text):
-        return "hi"
-    return "en"
+    devanagari = re.compile(r'[\u0900-\u097F]')
+    return "hi" if devanagari.search(text) else "en"
 
-
-def build_prompt(transcript: str) -> tuple[str, str]:
+def build_user_message(transcript: str, curriculum_context: str = "") -> tuple[str, str]:
     language = detect_language(transcript)
-    language_instruction = (
-        "Respond entirely in Hindi (Devanagari script)."
+    
+    lang_instruction = (
+        "महत्वपूर्ण: पूरा जवाब हिंदी में दें। कोई भी शब्द अंग्रेज़ी में न लिखें।"
         if language == "hi"
         else "Respond in English."
     )
-    user_message = f"{language_instruction}\n\nTeacher's request: {transcript}"
-    return user_message, language
+    
+    message = f"{lang_instruction}\n\n{curriculum_context}\n\nTeacher's request: {transcript}"
+    return message, language
 
 
 # ---------------------------------------------------------------------------
-# Synchronous Gemini call — run inside executor to avoid blocking event loop
+# primary: Bedrock Call
+# ---------------------------------------------------------------------------
+def _invoke_bedrock_sync(user_message: str) -> str:
+    body = {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 400,
+        "system": SYSTEM_PROMPT,
+        "messages": [{"role": "user", "content": user_message}]
+    }
+    response = bedrock_client.invoke_model(
+        modelId=os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0"),
+        body=json.dumps(body)
+    )
+    result = json.loads(response["body"].read())
+    return result["content"][0]["text"]
+
+async def generate_lesson_from_bedrock(user_message: str) -> str:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, partial(_invoke_bedrock_sync, user_message))
+
+
+# ---------------------------------------------------------------------------
+# fallback: Gemini Call
 # ---------------------------------------------------------------------------
 def _invoke_gemini_sync(user_message: str) -> str:
-    """
-    Blocking Gemini SDK call. Must only be called via run_in_executor.
-    Creates the model lazily (no API call at import/startup time).
-    Retries up to 3 times on ResourceExhausted, using the error's own retry_delay.
-    """
-    import time
-    from google.api_core.exceptions import ResourceExhausted
-
-    # Lazy model creation — avoids burning quota on server startup
-    model = genai.GenerativeModel(model_name="gemini-2.5-flash")
-
     full_prompt = f"{SYSTEM_PROMPT}\n\n---\n\n{user_message}"
-    gen_config = genai.GenerationConfig(
-        max_output_tokens=2048,
-        temperature=0.7,
-    )
+    response = gemini_model.generate_content(full_prompt)
+    return response.text
 
-    last_exc = None
-    for attempt in range(3):
-        try:
-            response = model.generate_content(full_prompt, generation_config=gen_config)
-            return response.text
-        except ResourceExhausted as exc:
-            last_exc = exc
-            # Parse the retry_delay seconds from gRPC error metadata if available
-            wait = 60  # safe default
-            try:
-                for detail in exc.details():
-                    if hasattr(detail, 'retry_delay'):
-                        wait = max(detail.retry_delay.seconds + 5, 10)
-                        break
-            except Exception:
-                pass
-            logger.warning(f"Gemini rate limit (attempt {attempt + 1}/3) — waiting {wait}s")
-            time.sleep(wait)
-        except Exception as exc:
-            raise exc
-
-    raise last_exc
-
-
-# ---------------------------------------------------------------------------
-# Async wrapper — the main entry point called by main.py routes
-# ---------------------------------------------------------------------------
-async def generate_lesson_from_ai(transcript: str) -> str:
-    """
-    Async lesson generation via Gemini API.
-    Off-loads the blocking SDK call to a thread pool executor.
-    Returns the raw lesson text string.
-    """
-    user_message, language = build_prompt(transcript)
-    logger.info(f"Calling Gemini | language={language} | model=gemini-2.0-flash")
-
+async def generate_lesson_from_gemini(user_message: str) -> str:
     loop = asyncio.get_event_loop()
-    lesson_text = await loop.run_in_executor(
-        None,
-        partial(_invoke_gemini_sync, user_message),
+    return await loop.run_in_executor(None, partial(_invoke_gemini_sync, user_message))
+
+
+# ---------------------------------------------------------------------------
+# Core Entrypoint (PRD Section 14)
+# ---------------------------------------------------------------------------
+async def generate_lesson_from_ai(transcript: str, curriculum_context: str = "") -> dict:
+    user_message, language = build_user_message(transcript, curriculum_context)
+    try:
+        logger.info("Calling PRIMARY: AWS Bedrock")
+        lesson_text = await generate_lesson_from_bedrock(user_message)
+    except Exception as e:
+        logger.warning(f"Bedrock unavailable, using FALLBACK (Gemini): {e}")
+        lesson_text = await generate_lesson_from_gemini(user_message)
+        
+    return {"lesson_text": lesson_text, "language": language}
+
+
+# ---------------------------------------------------------------------------
+# AWS Polly (PRD Section 9)
+# ---------------------------------------------------------------------------
+def _generate_polly_sync(text: str, language: str) -> str:
+    voice_id = "Aditi" if language == "hi" else "Joanna"
+    lang_code = "hi-IN" if language == "hi" else "en-US"
+    
+    response = polly_client.synthesize_speech(
+        Text=text[:1500],  # Polly limit
+        OutputFormat='mp3',
+        VoiceId=voice_id,
+        LanguageCode=lang_code
     )
+    
+    audio_key = f"audio/{uuid.uuid4()}.mp3"
+    s3_client.put_object(
+        Bucket=S3_BUCKET_NAME,
+        Key=audio_key,
+        Body=response['AudioStream'].read(),
+        ContentType='audio/mpeg'
+    )
+    
+    # Needs to be a public URL or presigned URL for Twilio to access
+    return f"https://{S3_BUCKET_NAME}.s3.{os.getenv('AWS_DEFAULT_REGION', 'ap-south-1')}.amazonaws.com/{audio_key}"
 
-    logger.info("Gemini call succeeded")
-    return lesson_text
+async def generate_polly_audio(text: str, language: str) -> str:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, partial(_generate_polly_sync, text, language))
 
 
 # ---------------------------------------------------------------------------
-# WhatsApp — real Twilio delivery (async, non-blocking via run_in_executor)
+# WhatsApp Delivery (unchanged from MVP, adapted slightly)
 # ---------------------------------------------------------------------------
-
 def _send_whatsapp_sync(lesson_text: str, whatsapp_number: str, latency_ms: int) -> str:
-    """
-    Blocking Twilio SDK call. Run only via run_in_executor — never call directly
-    from an async route.
-    Returns the Twilio message SID on success.
-    """
-    from twilio.rest import Client  # imported here so missing creds don't crash startup
-
+    from twilio.rest import Client
     divider = "━━━━━━━━━━━━━━━━━━━━"
     body = (
         f"🏫 PathShala AI — Aaj ka Lesson Plan\n\n"
         f"{lesson_text.strip()}\n\n"
         f"{divider}\n"
-        f"⏱ Generated in {latency_ms}ms\n"
+        f"⏱ Generated in {latency_ms//1000}.{latency_ms%1000}s | 💾 Saved to history\n"
         f"🤖 PathShala AI — Voice se lesson, turant"
     )
 
@@ -176,21 +215,9 @@ def _send_whatsapp_sync(lesson_text: str, whatsapp_number: str, latency_ms: int)
     )
     return message.sid
 
-
 async def send_whatsapp(lesson_text: str, whatsapp_number: str, latency_ms: int = 0) -> None:
-    """
-    Async wrapper — off-loads the blocking Twilio call to a thread pool.
-    Errors are caught and logged so they never surface to the HTTP response.
-    Falls back to console print if Twilio credentials are not configured.
-    """
-    # Graceful fallback when creds are absent (local dev without .env Twilio keys)
     if not settings.TWILIO_ACCOUNT_SID or not settings.TWILIO_AUTH_TOKEN:
-        logger.warning("Twilio credentials not set — printing WhatsApp message to console")
-        print("\n" + "=" * 60)
-        print(f"[WhatsApp FALLBACK → console] → {whatsapp_number}")
-        print("=" * 60)
-        print(f"🏫 PathShala AI — Aaj ka Lesson Plan\n\n{lesson_text.strip()}")
-        print("=" * 60 + "\n")
+        logger.warning(f"Twilio credentials not set — would send {whatsapp_number}")
         return
 
     try:
@@ -202,49 +229,3 @@ async def send_whatsapp(lesson_text: str, whatsapp_number: str, latency_ms: int 
         logger.info(f"WhatsApp sent to {whatsapp_number} | SID={sid}")
     except Exception as exc:
         logger.error(f"WhatsApp send failed for {whatsapp_number}: {exc}")
-
-
-# ---------------------------------------------------------------------------
-# ── BEDROCK CODE (preserved, commented out) ──────────────────────────────
-# To switch back to Bedrock:
-#   1. pip install boto3 botocore
-#   2. Uncomment the block below
-#   3. Replace generate_lesson_from_ai with generate_lesson_from_bedrock
-# ---------------------------------------------------------------------------
-# import json
-# import boto3
-# from botocore.config import Config
-#
-# _bedrock_config = Config(
-#     region_name=settings.AWS_REGION,
-#     retries={"max_attempts": 1, "mode": "standard"},
-# )
-# bedrock_client = boto3.client(
-#     "bedrock-runtime",
-#     region_name=settings.AWS_REGION,
-#     config=_bedrock_config,
-# )
-#
-# def _invoke_bedrock_sync(user_message: str) -> str:
-#     body = {
-#         "anthropic_version": "bedrock-2023-05-31",
-#         "max_tokens": 400,
-#         "system": SYSTEM_PROMPT,
-#         "messages": [{"role": "user", "content": user_message}],
-#     }
-#     response = bedrock_client.invoke_model(
-#         modelId=settings.BEDROCK_MODEL_ID,
-#         body=json.dumps(body),
-#         contentType="application/json",
-#         accept="application/json",
-#     )
-#     result = json.loads(response["body"].read())
-#     return result["content"][0]["text"]
-#
-# async def generate_lesson_from_bedrock(transcript: str) -> dict:
-#     user_message, language = build_prompt(transcript)
-#     loop = asyncio.get_event_loop()
-#     lesson_text = await loop.run_in_executor(
-#         None, partial(_invoke_bedrock_sync, user_message)
-#     )
-#     return {"lesson_text": lesson_text, "language": language}

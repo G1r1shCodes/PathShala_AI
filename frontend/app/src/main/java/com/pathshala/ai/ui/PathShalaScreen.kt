@@ -149,13 +149,22 @@ fun PathShalaScreen(
             Text(
                 when (uiState) {
                     is UiState.Listening   -> "🔴 सुन रहा हूँ... / Listening..."
-                    is UiState.Processing  -> "⚙️ तैयार हो रहा है... / Processing..."
-                    else                   -> "🎤 बोलने के लिए दबाएँ / Tap to speak"
+                    is UiState.Processing  -> "Generating lesson plan..."
+                    else                   -> "🎤 TAP TO SPEAK"
                 },
                 color = if (uiState is UiState.Listening) Color.Red else TextMuted,
                 fontSize = 14.sp,
                 fontWeight = if (uiState is UiState.Listening) FontWeight.Bold else FontWeight.Normal
             )
+            
+            if (uiState !is UiState.Listening && uiState !is UiState.Processing) {
+                Text(
+                    "ya yahan type karein",
+                    color = TextMuted,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
 
             Spacer(Modifier.height(32.dp))
 
@@ -168,7 +177,7 @@ fun PathShalaScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = Saffron, strokeWidth = 3.dp)
                     Spacer(Modifier.height(12.dp))
-                    Text("AI सोच रहा है... Creating magic", color = Saffron, fontSize = 14.sp)
+                    Text("Generating lesson plan...", color = Saffron, fontSize = 14.sp)
                 }
             }
 
@@ -341,7 +350,7 @@ fun LessonCard(lesson: LessonResponse, onPlayClick: () -> Unit) {
 
             // WhatsApp confirmation text
             Text(
-                text = "📲 Lesson sent to WhatsApp",
+                text = "📲 Sent to WhatsApp",
                 fontSize = 13.sp,
                 color = Color(0xFF2E7D32),
                 modifier = Modifier.padding(top = 8.dp)

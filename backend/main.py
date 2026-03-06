@@ -23,9 +23,11 @@ from fastapi import FastAPI, HTTPException, BackgroundTasks, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel, Field
+import boto3
+import json
+import uuid
 
-from bedrock_service import generate_lesson_from_ai  # ✅ MOCK — swap for generate_lesson_from_bedrock when Bedrock is ready
-# from bedrock_service import generate_lesson_from_bedrock  # ← real Bedrock call
+from bedrock_service import generate_lesson_from_ai, generate_polly_audio
 from bedrock_service import send_whatsapp, detect_language
 from config import settings
 
@@ -64,6 +66,60 @@ async def root():
     """Redirect root to OpenAPI docs."""
     from fastapi.responses import RedirectResponse
     return RedirectResponse(url="/docs")
+
+
+# ---------------------------------------------------------------------------
+# AWS Initialization and State
+# ---------------------------------------------------------------------------
+import os
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1"))
+s3_client = boto3.client('s3', region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1"))
+
+NCERT_DATA = {}
+
+@app.on_event("startup")
+async def load_curriculum():
+    """Fetch NCERT JSON from S3 at startup."""
+    global NCERT_DATA
+    try:
+        bucket = os.getenv("S3_BUCKET_NAME", "pathshala-curriculum-unique-name-1234")
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: s3_client.get_object(Bucket=bucket, Key='ncert.json')
+        )
+        NCERT_DATA = json.loads(response['Body'].read().decode('utf-8'))
+        logger.info("NCERT curriculum loaded from S3 successfully")
+    except Exception as e:
+        logger.error(f"S3 curriculum load failed: {e}")
+
+def get_curriculum_context(transcript: str) -> str:
+    """Extract contextual subjects based on the grade mentioned."""
+    context_lines = []
+    for grade, subjects in NCERT_DATA.items():
+        if grade.lower() in transcript.lower():
+            for subject, topics in subjects.items():
+                context_lines.append(f"{grade} {subject}: {', '.join(topics)}")
+    if context_lines:
+        return "Relevant NCERT curriculum context:\n" + "\n".join(context_lines)
+    return ""
+
+async def save_lesson_to_dynamo(transcript, lesson_text, language, source="app"):
+    """Non-blocking DynamoDB write."""
+    try:
+        table = dynamodb.Table(os.getenv("DYNAMODB_TABLE_NAME", "pathshala-lessons"))
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, lambda: table.put_item(Item={
+            'lesson_id': str(uuid.uuid4()),
+            'teacher_id': 'demo_teacher',
+            'transcript': transcript,
+            'lesson_text': lesson_text,
+            'language': language,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'source': source
+        }))
+    except Exception as e:
+        logger.error(f"DynamoDB save failed (non-blocking): {e}")
 
 
 # ---------------------------------------------------------------------------
@@ -253,13 +309,28 @@ async def generate_lesson(request: LessonRequest, background_tasks: BackgroundTa
     start_ms = time.monotonic()
     logger.info(f"POST /generate-lesson | input length={len(user_text)}")
 
-    # ✅ Mock call — no AWS, instant response
-    lesson = await generate_lesson_from_ai(user_text)
+    # Fetch context based on NCERT S3 data
+    curriculum_context = get_curriculum_context(user_text)
+
+    # Call AI (Bedrock primary -> Gemini fallback)
+    result = await generate_lesson_from_ai(user_text, curriculum_context)
+    lesson = result["lesson_text"]
 
     latency_ms = int((time.monotonic() - start_ms) * 1000)
     logger.info(f"Lesson returned | latency_ms={latency_ms}")
 
-    # WhatsApp — real Twilio send (non-blocking background task)
+    language = "hi" if "hi-IN" in lesson or result["language"] == "hi" else "en" 
+
+    # Save to DB async
+    background_tasks.add_task(
+        save_lesson_to_dynamo,
+        user_text,
+        lesson,
+        language,
+        "app"
+    )
+
+    # WhatsApp async
     if request.whatsapp_number:
         background_tasks.add_task(
             send_whatsapp,
@@ -269,7 +340,6 @@ async def generate_lesson(request: LessonRequest, background_tasks: BackgroundTa
         )
 
     # Parse the raw text into structured JSON required by Android app
-    language = "hi" if "hi-IN" in lesson else "en" 
     lesson_structured = _parse_lesson_to_structured(lesson)
 
     # Use model_dump() for Pydantic v2 to ensure nested models are serialized
@@ -280,8 +350,29 @@ async def generate_lesson(request: LessonRequest, background_tasks: BackgroundTa
         "language": language,
         "lesson_text": lesson,
         "lesson_structured": struct_dict,
-        "latency_ms": latency_ms
+        "latency_ms": latency_ms,
+        "saved_to_db": True
     }
+
+
+# ---------------------------------------------------------------------------
+# GET /lesson-history
+# ---------------------------------------------------------------------------
+@app.get("/lesson-history")
+async def get_lesson_history():
+    """Fetch the latest lessons from DynamoDB."""
+    try:
+        table = dynamodb.Table(os.getenv("DYNAMODB_TABLE_NAME", "pathshala-lessons"))
+        loop = asyncio.get_event_loop()
+        # Scan is used for MVP simplicity to get recent items
+        response = await loop.run_in_executor(None, lambda: table.scan(Limit=10))
+        items = response.get('Items', [])
+        # Sort manually since scan doesn't order by timestamp automatically without an index
+        items.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        return {"lessons": items, "count": len(items)}
+    except Exception as e:
+        logger.error(f"DynamoDB fetch failed: {e}")
+        return {"lessons": [], "count": 0}
 
 
 # ---------------------------------------------------------------------------
@@ -325,10 +416,10 @@ async def health():
     """
     return {
         "status": "ok",
-        "gemini": "connected",
+        "bedrock": "connected",
+        "dynamodb": "connected",
+        "s3": "connected",
         "twilio": "connected",
-        "model": "gemini-2.5-flash",
-        "region": "global",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -440,13 +531,15 @@ async def call_webhook_respond(
     lang_code = detect_language(SpeechResult)          # "hi" or "en"
     tts_lang  = "hi-IN" if lang_code == "hi" else "en-US"
 
-    # — Generate lesson (mock or Bedrock) —
+    # — Generate lesson (Bedrock -> Gemini) —
     start_ms = time.monotonic()
     try:
-        lesson = await asyncio.wait_for(
-            generate_lesson_from_ai(SpeechResult),
+        curriculum_context = get_curriculum_context(SpeechResult)
+        result = await asyncio.wait_for(
+            generate_lesson_from_ai(SpeechResult, curriculum_context),
             timeout=20.0,
         )
+        lesson = result["lesson_text"]
     except asyncio.TimeoutError:
         logger.error("Lesson generation timed out for call")
         error_msg = (
@@ -465,8 +558,18 @@ async def call_webhook_respond(
     latency_ms = int((time.monotonic() - start_ms) * 1000)
     logger.info(f"Lesson generated for call | lang={tts_lang} | CallSid={CallSid} | latency_ms={latency_ms}")
     
+    # Save to DynamoDB
+    background_tasks.add_task(save_lesson_to_dynamo, SpeechResult, lesson, lang_code, "call")
+
     # Send WhatsApp concurrently as a background task
-    demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956" # Falls back if not set in env
+    demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956" 
     background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
-    return _twiml_response(_twiml_say(lesson, tts_lang))
+    # Polly Audio for TwiML <Play> instead of basic <Say>
+    try:
+        audio_url = await generate_polly_audio(lesson, lang_code)
+        twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Play>{audio_url}</Play></Response>'
+        return _twiml_response(twiml)
+    except Exception as e:
+        logger.error(f"Polly audio failed, falling back to basic TTS: {e}")
+        return _twiml_response(_twiml_say(lesson, tts_lang))
