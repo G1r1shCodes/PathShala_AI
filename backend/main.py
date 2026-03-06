@@ -567,7 +567,7 @@ async def call_webhook_process(
         curriculum_context = get_curriculum_context(SpeechResult)
         result = await asyncio.wait_for(
             generate_lesson_from_ai(SpeechResult, curriculum_context),
-            timeout=25.0, # Now we have a fresh Twilio connection, so we can use a longer timeout!
+            timeout=13.0, # Must respond within Twilio's 15s webhook timeout
         )
         lesson = result["lesson_text"]
     except asyncio.TimeoutError:
@@ -584,10 +584,6 @@ async def call_webhook_process(
     demo_number = settings.TWILIO_WHATSAPP_TO or "+916369631956" 
     background_tasks.add_task(send_whatsapp, lesson, demo_number, latency_ms)
 
-    try:
-        audio_url = await generate_polly_audio(lesson, lang_code)
-        twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Play>{audio_url}</Play></Response>'
-        return _twiml_response(twiml)
-    except Exception as e:
-        logger.error(f"Polly audio failed, falling back to basic TTS: {e}")
-        return _twiml_response(_twiml_say(lesson, tts_lang))
+    # Use Twilio's built-in <Say> TTS directly — instant, no extra network calls
+    # (Polly+S3 adds 3-5s overhead that exceeds Twilio's 15s webhook timeout)
+    return _twiml_response(_twiml_say(lesson, tts_lang))
