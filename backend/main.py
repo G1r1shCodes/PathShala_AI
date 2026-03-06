@@ -216,9 +216,9 @@ def _parse_lesson_to_structured(lesson_text: str) -> LessonStructured:
 
     grades: list[GradeSection] = []
 
-    # Match "Grade N" or "Class N" etc.
+    # Match "Grade N Subject - Topic" or "Class N Science - Solar System"
     grade_header_pattern = re.compile(
-        r'^(?:Class|Grade|कक्षा)\s+\d+\s+(.+?)\s*[—–-]\s*(.+)$',
+        r'^((?:Class|Grade|कक्षा)\s+\d+)\s+(.+?)\s*[—–-]\s*(.+)$',
         re.MULTILINE | re.IGNORECASE,
     )
     # Match "• Activity 1 (15 min): " or "Activity 1 (15 min): "
@@ -244,10 +244,9 @@ def _parse_lesson_to_structured(lesson_text: str) -> LessonStructured:
         ])
 
     for i, match in enumerate(headers):
-        # Fallback if the header is just "Class 1" without subject/topic
-        grade_name = match.group(0).split('—')[0].split('-')[0].strip()
-        subject = match.group(1).strip() if match.lastindex >= 1 else "General"
-        topic = match.group(2).strip() if match.lastindex >= 2 else "Lesson"
+        grade_name = match.group(1).strip()
+        subject = match.group(2).strip()
+        topic = match.group(3).strip()
 
         # Extract the block of text for this grade section
         start = match.end()

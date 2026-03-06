@@ -86,6 +86,7 @@ Output format — follow this exactly:
 Tip: one practical teaching tip
 
 Constraints:
+- ONLY generate a lesson plan for the specific grade(s) requested by the teacher. DO NOT hallucinate or generate plans for grades that were not mentioned.
 - Maximum 200 words total
 - Each activity has a time estimate in minutes
 - No preamble or closing remarks
