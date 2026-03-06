@@ -187,7 +187,12 @@ def _generate_polly_sync(text: str, language: str) -> str:
     )
     
     # Needs to be a public URL or presigned URL for Twilio to access
-    return f"https://{S3_BUCKET_NAME}.s3.{os.getenv('AWS_DEFAULT_REGION', 'ap-south-1')}.amazonaws.com/{audio_key}"
+    presigned_url = s3_client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': S3_BUCKET_NAME, 'Key': audio_key},
+        ExpiresIn=3600  # Valid for 1 hour
+    )
+    return presigned_url
 
 async def generate_polly_audio(text: str, language: str) -> str:
     loop = asyncio.get_event_loop()
