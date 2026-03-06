@@ -494,9 +494,9 @@ async def call_webhook():
     """
     logger.info("Incoming call — opening Gather")
     twiml = _twiml_gather(
-        prompt="Namaste! Please speak your lesson request in Hindi or English. For example — Class 1 vowels aur Class 3 multiplication.",
+        prompt="Namaste! Please speak your lesson request. For example, Class 5 solar system, or Class 3 multiplication.",
         action="/call-webhook/respond",
-        language="hi-IN",  # Use Hindi STT by default to capture Devanagari accurately
+        language="en-IN",  # Use Indian English STT — handles English and Hinglish properly
     )
     return _twiml_response(twiml)
 
@@ -525,7 +525,7 @@ async def call_webhook_respond(
         twiml = _twiml_gather(
             prompt="Sorry, I did not catch that. Please tell me your lesson request.",
             action="/call-webhook/respond",
-            language="hi-IN",
+            language="en-IN",
         )
         return _twiml_response(twiml)
 
