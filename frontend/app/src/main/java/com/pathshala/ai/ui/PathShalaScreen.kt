@@ -1,5 +1,7 @@
 package com.pathshala.ai.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.speech.tts.TextToSpeech
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -159,6 +161,25 @@ fun PathShalaScreen(
                 state = uiState,
                 onClick = onMicClick
             )
+
+            Spacer(Modifier.height(32.dp))
+
+            // ── Call AI Button ───────────────────────────────────────────────────
+            Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Call AI Co-Teacher 📞", fontWeight = FontWeight.SemiBold)
+            }
 
             Spacer(Modifier.height(12.dp))
             Text(
