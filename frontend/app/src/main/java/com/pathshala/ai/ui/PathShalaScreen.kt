@@ -79,7 +79,6 @@ fun PathShalaScreen(
     loginVm: LoginViewModel = viewModel()
 ) {
     val uiState by vm.uiState.collectAsState()
-    val transcript by vm.transcript.collectAsState()
     val userPhone by loginVm.userPhone.collectAsState()
     val context = LocalContext.current
 
@@ -91,7 +90,7 @@ fun PathShalaScreen(
                 tts?.setLanguage(Locale("hi", "IN"))
                     ?.let { result ->
                         if (result == TextToSpeech.LANG_MISSING_DATA) {
-                            tts?.setLanguage(Locale.ENGLISH)
+                            tts?.language = Locale.ENGLISH
                         }
                     }
             }

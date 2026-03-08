@@ -134,11 +134,10 @@ class MainActivity : ComponentActivity() {
 
     private fun startListening() {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE,              "hi-IN")
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,   "hi-IN")
-            putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, false)
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,           3)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            // Remove the hardcoded "hi-IN" override so it uses the system default 
+            // and allows the Android Google App to do standard auto-detection of Eng/Hindi.
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
         }
         speechRecognizer.startListening(intent)
     }

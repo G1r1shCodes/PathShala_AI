@@ -656,15 +656,6 @@ private fun ErrorSection(message: String, onDismiss: () -> Unit) {
 @Composable
 private fun VerifiedSection() {
     val infiniteTransition = rememberInfiniteTransition(label = "check")
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.1f,
-        animationSpec = infiniteRepeatable(
-            tween(600, easing = FastOutSlowInEasing),
-            RepeatMode.Reverse
-        ),
-        label = "checkScale"
-    )
 
     Column(
         modifier = Modifier
