@@ -42,9 +42,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setupSpeechRecognizer()
 
+        val prefs = getSharedPreferences("PathShalaPrefs", MODE_PRIVATE)
+        val savedPhone = prefs.getString("USER_PHONE", null)
+
+        if (savedPhone != null) {
+            loginVm.restoreUserPhone(savedPhone)
+        }
+
         setContent {
             PathShalaTheme {
-                var isLoggedIn by remember { mutableStateOf(false) }
+                var isLoggedIn by remember { mutableStateOf(savedPhone != null) }
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -60,11 +67,18 @@ class MainActivity : ComponentActivity() {
                     ) { loggedIn ->
                         if (loggedIn) {
                             PathShalaScreen(
-                                onMicClick = { onMicPressed() }
+                                onMicClick = { onMicPressed() },
+                                onLogout = {
+                                    prefs.edit().remove("USER_PHONE").apply()
+                                    isLoggedIn = false
+                                }
                             )
                         } else {
                             LoginScreen(
-                                onLoginSuccess = { isLoggedIn = true }
+                                onLoginSuccess = { 
+                                    prefs.edit().putString("USER_PHONE", loginVm.userPhone.value).apply()
+                                    isLoggedIn = true 
+                                }
                             )
                         }
                     }

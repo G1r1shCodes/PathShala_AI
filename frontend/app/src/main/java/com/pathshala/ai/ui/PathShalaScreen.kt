@@ -40,6 +40,7 @@ val TopBarBg    = Color(0xFF121212)
 @Composable
 fun PathShalaScreen(
     onMicClick: () -> Unit,
+    onLogout: () -> Unit,
     vm: MainViewModel = viewModel(),
     loginVm: LoginViewModel = viewModel()
 ) {
@@ -76,6 +77,15 @@ fun PathShalaScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
+                },
+                actions = {
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            Icons.Default.Logout,
+                            contentDescription = "Logout",
+                            tint = Color.White
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = TopBarBg

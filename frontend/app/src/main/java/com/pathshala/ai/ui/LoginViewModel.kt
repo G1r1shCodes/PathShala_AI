@@ -36,6 +36,11 @@ class LoginViewModel : ViewModel() {
     private val _userPhone = MutableStateFlow("")
     val userPhone: StateFlow<String> = _userPhone
 
+    fun restoreUserPhone(phone: String) {
+        _userPhone.value = phone
+        _loginState.value = LoginState.Verified(null)
+    }
+
     fun sendOtp(phoneNumber: String) {
         if (phoneNumber.length != 10) {
             _loginState.value = LoginState.Error(
