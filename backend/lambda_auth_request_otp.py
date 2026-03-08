@@ -52,9 +52,9 @@ def send_sms_twilio(phone: str, otp: str):
     req.add_header("Authorization", f"Basic {auth}")
     req.add_header("Content-Type", "application/x-www-form-urlencoded")
 
-    with urllib.request.urlopen(req) as response:
+    with urllib.request.urlopen(req, timeout=10) as response:
         status = response.status
-        logger.info(f"Twilio SMS sent to {phone}, status: {status}")
+        logger.info(f"Twilio WhatsApp sent to {phone}, status: {status}")
         return status
 
 
