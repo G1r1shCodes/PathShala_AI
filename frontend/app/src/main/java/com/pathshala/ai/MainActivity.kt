@@ -12,10 +12,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import com.pathshala.ai.ui.LoginScreen
 import com.pathshala.ai.ui.MainViewModel
 import com.pathshala.ai.ui.PathShalaScreen
 import com.pathshala.ai.ui.theme.PathShalaTheme
@@ -39,13 +42,30 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PathShalaTheme {
+                var isLoggedIn by remember { mutableStateOf(false) }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color    = MaterialTheme.colorScheme.background
                 ) {
-                    PathShalaScreen(
-                        onMicClick = { onMicPressed() }
-                    )
+                    AnimatedContent(
+                        targetState = isLoggedIn,
+                        transitionSpec = {
+                            fadeIn() + slideInHorizontally { it } togetherWith
+                                    fadeOut() + slideOutHorizontally { -it }
+                        },
+                        label = "navTransition"
+                    ) { loggedIn ->
+                        if (loggedIn) {
+                            PathShalaScreen(
+                                onMicClick = { onMicPressed() }
+                            )
+                        } else {
+                            LoginScreen(
+                                onLoginSuccess = { isLoggedIn = true }
+                            )
+                        }
+                    }
                 }
             }
         }

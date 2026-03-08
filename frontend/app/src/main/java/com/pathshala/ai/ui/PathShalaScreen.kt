@@ -157,14 +157,6 @@ fun PathShalaScreen(
                 fontWeight = if (uiState is UiState.Listening) FontWeight.Bold else FontWeight.Normal
             )
 
-            if (uiState !is UiState.Listening && uiState !is UiState.Processing) {
-                Text(
-                    "ya yahan type karein",
-                    color = TextMuted,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
 
             Spacer(Modifier.height(32.dp))
 
@@ -293,32 +285,22 @@ fun LessonCard(lesson: LessonResponse, onPlayClick: () -> Unit) {
             HorizontalDivider(color = Color(0xFFF0F0F0))
             Spacer(Modifier.height(16.dp))
 
-            if (lesson.lesson_structured != null) {
-                lesson.lesson_structured.grades.forEach { grade ->
+            if (lesson.lesson_structured != null && lesson.lesson_structured.sections.isNotEmpty()) {
+                lesson.lesson_structured.sections.forEach { section ->
                     Text(
-                        "${grade.grade} • ${grade.subject}",
+                        "${section.grade} • ${section.subject}",
                         fontWeight = FontWeight.Bold,
                         fontSize   = 14.sp,
                         color      = Saffron,
                         modifier = Modifier.background(Saffron.copy(alpha = 0.1f), RoundedCornerShape(4.dp)).padding(horizontal = 8.dp, vertical = 2.dp)
                     )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        grade.topic,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize   = 18.sp,
-                        color      = TextPrimary
-                    )
+                    Spacer(Modifier.height(16.dp))
                     
-                    Spacer(Modifier.height(12.dp))
-                    grade.activities.forEachIndexed { idx, act ->
+                    section.activities.forEachIndexed { idx, activityDesc ->
                         Row(modifier = Modifier.padding(vertical = 4.dp)) {
                             Text("${idx + 1}.", fontWeight = FontWeight.Bold, color = DeepGreen, fontSize = 14.sp)
                             Spacer(Modifier.width(8.dp))
-                            Column {
-                                Text(act.description, fontSize = 14.sp, color = TextPrimary, lineHeight = 20.sp)
-                                Text("${act.duration_min} mins", fontSize = 12.sp, color = TextMuted)
-                            }
+                            Text(activityDesc, fontSize = 14.sp, color = TextPrimary, lineHeight = 20.sp)
                         }
                     }
                     
@@ -331,7 +313,7 @@ fun LessonCard(lesson: LessonResponse, onPlayClick: () -> Unit) {
                             Icon(Icons.Default.Lightbulb, contentDescription = null, tint = DeepGreen, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "Teacher Tip: ${grade.tip}",
+                                "Teacher Tip: ${section.tip}",
                                 fontSize  = 13.sp,
                                 color     = DeepGreen,
                                 fontWeight = FontWeight.Medium
@@ -340,6 +322,7 @@ fun LessonCard(lesson: LessonResponse, onPlayClick: () -> Unit) {
                     }
                 }
             } else {
+                // Fallback: show raw lesson text when structured sections are unavailable
                 Text(
                     lesson.lesson_text ?: "No lesson generated.",
                     fontSize = 15.sp,

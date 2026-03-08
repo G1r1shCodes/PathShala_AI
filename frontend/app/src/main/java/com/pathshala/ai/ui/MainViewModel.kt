@@ -60,6 +60,7 @@ class MainViewModel : ViewModel() {
 
             try {
                 val request = LessonRequest(
+                    text = transcriptText,
                     transcript = transcriptText,
                     language = detectLanguage(transcriptText),
                     whatsapp_number = whatsappNumber
@@ -68,7 +69,20 @@ class MainViewModel : ViewModel() {
                 if (response.isSuccessful && response.body() != null) {
                     _uiState.value = UiState.Success(response.body()!!)
                 } else {
-                    _uiState.value = UiState.Error("Server error: ${response.code()}")
+                    var errorMsg = "Server error: ${response.code()}"
+                    try {
+                        response.errorBody()?.string()?.let { errorBodyString ->
+                            val jsonObj = org.json.JSONObject(errorBodyString)
+                            if (jsonObj.has("error")) {
+                                errorMsg = jsonObj.getString("error")
+                            } else if (jsonObj.has("message")) {
+                                errorMsg = jsonObj.getString("message")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    _uiState.value = UiState.Error(errorMsg)
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.localizedMessage ?: "Unknown error")
@@ -95,15 +109,14 @@ class MainViewModel : ViewModel() {
             language = "hi",
             lesson_text = "यहाँ आपका पाठ विवरण है।",
             lesson_structured = LessonStructured(
-                grades = listOf(
+                sections = listOf(
                     GradeLesson(
                         grade = "Class 5",
-                        subject = "Science",
-                        topic = "Photosynthesis (प्रकाश संश्लेषण)",
+                        subject = "Science — Photosynthesis",
                         activities = listOf(
-                            Activity(10, "Introduction to Sunlight and Plants"),
-                            Activity(15, "Drawing a leaf diagram"),
-                            Activity(10, "Quiz on Chlorophyll")
+                            "Activity 1 (10 min): Introduction to Sunlight and Plants",
+                            "Activity 2 (15 min): Drawing a leaf diagram",
+                            "Activity 3 (10 min): Quiz on Chlorophyll"
                         ),
                         tip = "Use a real plant to show leaves to students."
                     )

@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-24:12
-INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-24:12
-INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-24:12
-INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-24:12
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:1-26:12
 MERGED from [androidx.compose.material3:material3-android:1.3.0] C:\Users\giris\.gradle\caches\transforms-4\e9bc8424a72b710e63245e1f488f670e\transformed\jetified-material3-release\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.compose.material:material-android:1.7.0] C:\Users\giris\.gradle\caches\transforms-4\af38b217cd6efa82cf60d7c23189b2c7\transformed\jetified-material-release\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.compose.material:material-ripple-android:1.7.0] C:\Users\giris\.gradle\caches\transforms-4\cb6f95677bf33164c2a97b29564399c2\transformed\jetified-material-ripple-release\AndroidManifest.xml:2:1-7:12
@@ -53,24 +53,24 @@ MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\giris\.gradle\caches\trans
 MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\giris\.gradle\caches\transforms-4\220f00bada1479d21dbf685225e2763a\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\giris\.gradle\caches\transforms-4\000f70ba4f31d84dc8014a94b76b428a\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
 	package
-		INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 	android:versionName
-		INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 	android:versionCode
-		INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:11-69
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:2:11-69
 uses-permission#android.permission.INTERNET
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:4:5-67
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:4:5-67
 	android:name
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:4:22-64
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:4:22-64
 uses-permission#android.permission.RECORD_AUDIO
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:5:5-71
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:5:5-71
 	android:name
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:5:22-68
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:5:22-68
 application
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:7:5-23:19
-INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:7:5-23:19
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:7:5-25:19
+INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:7:5-25:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.0] C:\Users\giris\.gradle\caches\transforms-4\a1e312822c2694766aca25acb0bcd286\transformed\jetified-ui-tooling-release\AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.7.0] C:\Users\giris\.gradle\caches\transforms-4\a1e312822c2694766aca25acb0bcd286\transformed\jetified-ui-tooling-release\AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-test-manifest:1.7.0] C:\Users\giris\.gradle\caches\transforms-4\dcf36e232ef443ab9bbe248087901981\transformed\jetified-ui-test-manifest-1.7.0\AndroidManifest.xml:22:5-26:19
@@ -88,39 +88,43 @@ MERGED from [androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\giris\.g
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\giris\.gradle\caches\transforms-4\86a6d0aaa0de764ec754c393850aa54c\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
 MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\giris\.gradle\caches\transforms-4\86a6d0aaa0de764ec754c393850aa54c\transformed\jetified-startup-runtime-1.1.1\AndroidManifest.xml:25:5-31:19
 	android:extractNativeLibs
-		INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.13.1] C:\Users\giris\.gradle\caches\transforms-4\74714178b00ba501e7cc193af1cf356e\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:10:9-35
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:10:9-35
 	android:label
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:9:9-37
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:9:9-37
 	android:allowBackup
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:8:9-35
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:8:9-35
+	android:theme
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:11:9-49
 	android:networkSecurityConfig
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:11:9-69
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:12:9-69
+	android:usesCleartextTraffic
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:13:9-44
 activity#com.pathshala.ai.MainActivity
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:13:9-21:20
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:15:9-23:20
 	android:windowSoftInputMode
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:16:13-55
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:18:13-55
 	android:exported
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:15:13-36
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:17:13-36
 	android:name
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:14:13-41
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:16:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:17:13-20:29
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:19:13-22:29
 action#android.intent.action.MAIN
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:18:17-69
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:20:17-69
 	android:name
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:18:25-66
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:20:25-66
 category#android.intent.category.LAUNCHER
-ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:19:17-77
+ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:21:17-77
 	android:name
-		ADDED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml:19:27-74
+		ADDED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:21:27-74
 uses-sdk
-INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
-INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 MERGED from [androidx.compose.material3:material3-android:1.3.0] C:\Users\giris\.gradle\caches\transforms-4\e9bc8424a72b710e63245e1f488f670e\transformed\jetified-material3-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.material3:material3-android:1.3.0] C:\Users\giris\.gradle\caches\transforms-4\e9bc8424a72b710e63245e1f488f670e\transformed\jetified-material3-release\AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.material:material-android:1.7.0] C:\Users\giris\.gradle\caches\transforms-4\af38b217cd6efa82cf60d7c23189b2c7\transformed\jetified-material-release\AndroidManifest.xml:5:5-44
@@ -218,9 +222,9 @@ MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\giris\.gradle\ca
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\giris\.gradle\caches\transforms-4\000f70ba4f31d84dc8014a94b76b428a\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\giris\.gradle\caches\transforms-4\000f70ba4f31d84dc8014a94b76b428a\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 	android:targetSdkVersion
-		INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from C:\Users\giris\Desktop\PathShala AI\frontend\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 activity#androidx.compose.ui.tooling.PreviewActivity
 ADDED from [androidx.compose.ui:ui-tooling-android:1.7.0] C:\Users\giris\.gradle\caches\transforms-4\a1e312822c2694766aca25acb0bcd286\transformed\jetified-ui-tooling-release\AndroidManifest.xml:23:9-25:39
 	android:exported

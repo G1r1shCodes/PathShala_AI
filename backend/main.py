@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field
 import boto3
 import json
 import uuid
+from mangum import Mangum
 
 from bedrock_service import generate_lesson_from_ai, generate_polly_audio
 from bedrock_service import send_whatsapp, detect_language
@@ -601,3 +602,8 @@ async def call_webhook_generate(
     except Exception as e:
         logger.warning(f"Polly failed — falling back to <Say>: {e}")
         return _twiml_response(_twiml_say(lesson, tts_lang))
+
+# ---------------------------------------------------------------------------
+# AWS Lambda Handler
+# ---------------------------------------------------------------------------
+handler = Mangum(app)

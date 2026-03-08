@@ -2,9 +2,41 @@ package com.pathshala.ai.model
 
 import com.google.gson.annotations.SerializedName
 
+// ─── Auth Models ────────────────────────────────────────────────────────────
+
+data class OtpRequest(
+    @SerializedName("phone") val phone: String
+)
+
+data class OtpResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("message") val message: String?
+)
+
+data class VerifyOtpRequest(
+    @SerializedName("phone") val phone: String,
+    @SerializedName("otp")   val otp: String
+)
+
+data class VerifyOtpResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("token")   val token: String?,
+    @SerializedName("teacher") val teacher: TeacherInfo?,
+    @SerializedName("message") val message: String?
+)
+
+data class TeacherInfo(
+    @SerializedName("phone")  val phone: String?,
+    @SerializedName("name")   val name: String?,
+    @SerializedName("school") val school: String?
+)
+
+// ─── Lesson Models ──────────────────────────────────────────────────────────
+
 data class LessonRequest(
-    @SerializedName("transcript")    val transcript: String,
-    @SerializedName("language")      val language: String,
+    @SerializedName("text")            val text: String? = null,
+    @SerializedName("transcript")      val transcript: String? = null,
+    @SerializedName("language")        val language: String,
     @SerializedName("whatsapp_number") val whatsapp_number: String
 )
 
@@ -19,18 +51,12 @@ data class LessonResponse(
 )
 
 data class LessonStructured(
-    @SerializedName("grades") val grades: List<GradeLesson>
+    @SerializedName("sections") val sections: List<GradeLesson>
 )
 
 data class GradeLesson(
     @SerializedName("grade")      val grade: String,
     @SerializedName("subject")    val subject: String,
-    @SerializedName("topic")      val topic: String,
-    @SerializedName("activities") val activities: List<Activity>,
+    @SerializedName("activities") val activities: List<String>,
     @SerializedName("tip")        val tip: String
-)
-
-data class Activity(
-    @SerializedName("duration_min") val duration_min: Int,
-    @SerializedName("description")  val description: String
 )

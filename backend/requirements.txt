@@ -25,3 +25,6 @@ twilio==9.3.7
 
 # Environment variable loading (dev convenience)
 python-dotenv==1.0.1
+
+# AWS Lambda adapter
+mangum==0.17.0
