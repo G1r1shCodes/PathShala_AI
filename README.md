@@ -23,6 +23,19 @@ PathShala AI is an AI-powered MVP designed to help rural teachers in India gener
 
 ---
 
+## 🧪 Testing the Prototype (For Hackathon Judges)
+
+Since this project currently uses a Twilio Trial account, we cannot send messages or OTPs to unverified numbers. To test the WhatsApp OTP and Lesson Plan delivery features yourself, please join our Twilio WhatsApp Sandbox first:
+
+1. **Open WhatsApp** on your phone.
+2. Send the message **`join <insert-your-sandbox-code-here>`** to **`+14155238886`** (Twilio's Sandbox Number).
+3. You will receive a confirmation message from Twilio that you have joined the Sandbox.
+4. You can now use the Android App to request an OTP and generate lesson plans using your WhatsApp number!
+
+*(Note to developer: Replace `<insert-your-sandbox-code-here>` with your actual Twilio Sandbox join word before submitting).*
+
+---
+
 ## 💻 Setup & Installation
 
 The project is divided into two primary parts: the FastAPI backend and the Native Android app.
