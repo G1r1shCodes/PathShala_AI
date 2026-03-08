@@ -36,8 +36,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         parsed_body = urllib.parse.parse_qs(body_str)
         speech_result = parsed_body.get("SpeechResult", [""])[0]
         call_sid = parsed_body.get("CallSid", [""])[0]
+        # Twilio sends the caller's number in the "From" field e.g. "+916369631956"
+        caller_number = parsed_body.get("From", [""])[0]
 
-        logger.info(f"CallSid={call_sid} | Speech='{speech_result}'")
+        logger.info(f"CallSid={call_sid} | From={caller_number} | Speech='{speech_result}'")
 
         base_url = os.environ.get("API_BASE_URL", "").rstrip("/")
         gather_action = f"{base_url}/call-webhook/respond"
@@ -76,7 +78,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "call_sid": call_sid,
                 "speech_result": speech_result,
                 "lang_code": lang_code,
-                "tts_lang": "hi-IN" if lang_code == "hi" else "en-US"
+                "tts_lang": "hi-IN" if lang_code == "hi" else "en-US",
+                "caller_number": caller_number   # forward caller's number for WhatsApp delivery
             }
             lambda_client.invoke(
                 FunctionName=generate_fn,

@@ -214,11 +214,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         else:
             logger.warning("No call_sid — skipping call update")
 
-        # 3. Side effects
-        demo_number = os.environ.get("TWILIO_WHATSAPP_TO")
+        # 3. Side effects — send WhatsApp to the caller who made the call
+        # caller_number is passed by lambda_call_respond from Twilio's "From" field.
+        # Falls back to TWILIO_WHATSAPP_TO env var (useful for app-triggered flows).
+        caller_number = event.get("caller_number", "")
+        whatsapp_target = caller_number or os.environ.get("TWILIO_WHATSAPP_TO", "")
         save_to_dynamo_sync(speech_result, lesson, lang_code)
-        if demo_number:
-            send_whatsapp_sync(lesson, demo_number)
+        if whatsapp_target:
+            send_whatsapp_sync(lesson, whatsapp_target)
+        else:
+            logger.warning("No WhatsApp target — skipping WhatsApp delivery")
 
         return {"statusCode": 200, "body": json.dumps({"success": True})}
 
