@@ -52,12 +52,13 @@ class BubbleShape : Shape {
             val tailH = with(density) { 10.dp.toPx() }
             val tailW = with(density) { 16.dp.toPx() }
             val cornerRadius = with(density) { 24.dp.toPx() }
-            val fabSize = with(density) { 68.dp.toPx() }
             
             addRoundRect(RoundRect(0f, 0f, size.width, size.height - tailH, CornerRadius(cornerRadius)))
             
-            // Tail aligned with the center of the 68dp FAB (which is aligned to the End)
-            val tailCenterX = size.width - (fabSize / 2)
+            // Tail points to FAB center. FAB center is 34dp from right of column. 
+            // Bubble right edge is 24dp from right of column. 
+            // So tail is 10dp left from bubble's right edge.
+            val tailCenterX = size.width - with(density) { 10.dp.toPx() }
             moveTo(tailCenterX - tailW/2, size.height - tailH)
             lineTo(tailCenterX, size.height)
             lineTo(tailCenterX + tailW/2, size.height - tailH)
@@ -136,7 +137,7 @@ fun PathShalaScreen(
         floatingActionButton = {
             Column(
                 horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(bottom = 24.dp, end = 24.dp)
+                modifier = Modifier.padding(bottom = 16.dp, end = 12.dp)
             ) {
                 // Tooltip Bubble
                 AnimatedVisibility(
@@ -149,7 +150,7 @@ fun PathShalaScreen(
                         shape = BubbleShape(),
                         border = BorderStroke(1.5.dp, Color.Black),
                         modifier = Modifier
-                            .padding(bottom = 4.dp)
+                            .padding(bottom = 4.dp, end = 24.dp)
                             .widthIn(max = 280.dp)
                     ) {
                         Text(
