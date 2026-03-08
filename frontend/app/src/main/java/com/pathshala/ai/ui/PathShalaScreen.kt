@@ -9,6 +9,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -23,6 +24,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.geometry.*
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pathshala.ai.model.LessonResponse
 import com.pathshala.ai.ui.LoginViewModel
@@ -37,6 +44,22 @@ val CardBg      = Color(0xFFFFFFFF)
 val TextPrimary = Color(0xFF212121)
 val TextMuted   = Color(0xFF757575)
 val TopBarBg    = Color(0xFF121212)
+val BubbleBg    = Color(0xFFF5F5F5)
+
+class BubbleShape : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val path = Path().apply {
+            val tailH = 25f
+            val tailW = 35f
+            addRoundRect(RoundRect(0f, 0f, size.width, size.height - tailH, CornerRadius(50f)))
+            moveTo(size.width - 70f, size.height - tailH)
+            lineTo(size.width - 30f, size.height)
+            lineTo(size.width - 35f, size.height - tailH)
+            close()
+        }
+        return Outline.Generic(path)
+    }
+}
 
 // ─── MAIN SCREEN ─────────────────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,11 +94,11 @@ fun PathShalaScreen(
     var textInput by remember { mutableStateOf("") }
     var showCallTooltip by remember { mutableStateOf(false) }
 
-    // Tooltip timer: show for 3 seconds on launch
+    // Tooltip timer: show for 10 seconds on launch
     LaunchedEffect(Unit) {
         delay(1000) // Small delay for entrance
         showCallTooltip = true
-        delay(3000)
+        delay(10000)
         showCallTooltip = false
     }
 
@@ -116,17 +139,20 @@ fun PathShalaScreen(
                     exit = fadeOut() + shrinkVertically()
                 ) {
                     Surface(
-                        color = Color(0xFFF5F5F5),
-                        shape = RoundedCornerShape(12.dp),
-                        shadowElevation = 4.dp,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        color = BubbleBg,
+                        shape = BubbleShape(),
+                        border = BorderStroke(1.2.dp, Color.Black),
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .widthIn(min = 180.dp)
                     ) {
                         Text(
                             "Get the Lesson Plan on Call",
                             color = Color.Black,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            fontWeight = FontWeight.Medium
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 18.dp),
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
