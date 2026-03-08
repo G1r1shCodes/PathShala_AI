@@ -49,13 +49,15 @@ val BubbleBg    = Color(0xFFF5F5F5)
 class BubbleShape : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
         val path = Path().apply {
-            val tailH = 20f
-            val tailW = 30f
-            val cornerRadius = 60f
+            val tailH = with(density) { 10.dp.toPx() }
+            val tailW = with(density) { 16.dp.toPx() }
+            val cornerRadius = with(density) { 24.dp.toPx() }
+            val fabSize = with(density) { 68.dp.toPx() }
+            
             addRoundRect(RoundRect(0f, 0f, size.width, size.height - tailH, CornerRadius(cornerRadius)))
             
-            // Tail centered relative to the bubble
-            val tailCenterX = size.width / 2
+            // Tail aligned with the center of the 68dp FAB (which is aligned to the End)
+            val tailCenterX = size.width - (fabSize / 2)
             moveTo(tailCenterX - tailW/2, size.height - tailH)
             lineTo(tailCenterX, size.height)
             lineTo(tailCenterX + tailW/2, size.height - tailH)
@@ -133,7 +135,7 @@ fun PathShalaScreen(
         },
         floatingActionButton = {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.End,
                 modifier = Modifier.padding(bottom = 24.dp, end = 24.dp)
             ) {
                 // Tooltip Bubble
@@ -147,14 +149,14 @@ fun PathShalaScreen(
                         shape = BubbleShape(),
                         border = BorderStroke(1.5.dp, Color.Black),
                         modifier = Modifier
-                            .padding(bottom = 8.dp)
-                            .widthIn(max = 240.dp)
+                            .padding(bottom = 4.dp)
+                            .widthIn(max = 280.dp)
                     ) {
                         Text(
                             "Get the Lesson Plan on Call",
                             color = Color.Black,
                             fontSize = 13.sp,
-                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 22.dp),
+                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 22.dp),
                             fontWeight = FontWeight.ExtraBold,
                             textAlign = TextAlign.Center
                         )
