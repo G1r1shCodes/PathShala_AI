@@ -19,6 +19,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import android.content.Intent
+import android.net.Uri
 
 // ─── LOGIN SCREEN ────────────────────────────────────────────────────────────
 @Composable
@@ -158,6 +161,14 @@ private fun PhoneEntrySection(
 ) {
     var phone by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    var sandboxExpanded by remember { mutableStateOf(true) }  // open by default for first-timers
+
+    // ─── Twilio Sandbox config ───────────────────────────────────────────────
+    // UPDATE these two constants with your actual Twilio Sandbox values!
+    val sandboxNumber = "14155238886"   // Twilio Sandbox WhatsApp number (no +)
+    val sandboxKeyword = "join <your-keyword>" // e.g. "join dusty-lion"
+    // ────────────────────────────────────────────────────────────────────────
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -178,7 +189,109 @@ private fun PhoneEntrySection(
             textAlign = TextAlign.Center
         )
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(24.dp))
+
+        // ── Sandbox Setup Banner (Option 1 + 3) ─────────────────────────────
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+            elevation = CardDefaults.cardElevation(0.dp)
+        ) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                // Header row — tap to expand/collapse
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { sandboxExpanded = !sandboxExpanded },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.WhatsApp,
+                        contentDescription = null,
+                        tint = Color(0xFF25D366),
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        "First Time? Set Up WhatsApp (30 sec)",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = DeepGreen,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        if (sandboxExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = DeepGreen
+                    )
+                }
+
+                // Collapsible body
+                AnimatedVisibility(visible = sandboxExpanded) {
+                    Column(modifier = Modifier.padding(top = 12.dp)) {
+                        Text(
+                            "To receive OTP and lesson plans on WhatsApp, join our Sandbox once:",
+                            fontSize = 12.sp,
+                            color = Color(0xFF2E7D32),
+                            lineHeight = 18.sp
+                        )
+                        Spacer(Modifier.height(10.dp))
+
+                        // Step 1
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                shape = CircleShape,
+                                color = DeepGreen,
+                                modifier = Modifier.size(22.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text("1", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Spacer(Modifier.width(10.dp))
+                            Text("Tap the button below to open WhatsApp", fontSize = 12.sp, color = TextPrimary)
+                        }
+                        Spacer(Modifier.height(6.dp))
+
+                        // Step 2
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Surface(
+                                shape = CircleShape,
+                                color = DeepGreen,
+                                modifier = Modifier.size(22.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text("2", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Spacer(Modifier.width(10.dp))
+                            Text("Hit Send on the pre-filled message — done! ✅", fontSize = 12.sp, color = TextPrimary)
+                        }
+
+                        Spacer(Modifier.height(14.dp))
+
+                        // One-tap WhatsApp deep link button (Option 1)
+                        Button(
+                            onClick = {
+                                val encodedMsg = Uri.encode(sandboxKeyword)
+                                val uri = Uri.parse("https://wa.me/$sandboxNumber?text=$encodedMsg")
+                                context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                            },
+                            modifier = Modifier.fillMaxWidth().height(44.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                            shape = RoundedCornerShape(10.dp)
+                        ) {
+                            Icon(Icons.Default.WhatsApp, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Open WhatsApp & Join Sandbox", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(20.dp))
 
         // Phone Card
         Card(
