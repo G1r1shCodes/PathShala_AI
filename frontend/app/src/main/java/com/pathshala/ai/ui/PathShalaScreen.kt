@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pathshala.ai.model.LessonResponse
+import com.pathshala.ai.ui.LoginViewModel
 import java.util.Locale
 
 // ─── COLOR PALETTE ────────────────────────────────────────────────────────────
@@ -39,10 +40,12 @@ val TopBarBg    = Color(0xFF121212)
 @Composable
 fun PathShalaScreen(
     onMicClick: () -> Unit,
-    vm: MainViewModel = viewModel()
+    vm: MainViewModel = viewModel(),
+    loginVm: LoginViewModel = viewModel()
 ) {
     val uiState by vm.uiState.collectAsState()
     val transcript by vm.transcript.collectAsState()
+    val userPhone by loginVm.userPhone.collectAsState()
     val context = LocalContext.current
 
     // TTS engine
@@ -120,7 +123,9 @@ fun PathShalaScreen(
                     Spacer(Modifier.height(16.dp))
                     Button(
                         onClick = {
-                            vm.generateLesson(textInput)
+                            // Pass user's login phone (with +91) for WhatsApp delivery
+                            val whatsapp = "+91$userPhone".takeIf { userPhone.isNotBlank() }
+                            vm.generateLesson(textInput, whatsappNumber = whatsapp)
                             textInput = ""
                         },
                         enabled = textInput.isNotBlank() && uiState !is UiState.Processing,

@@ -29,9 +29,12 @@ class LoginViewModel : ViewModel() {
     val resendCooldown: StateFlow<Int> = _resendCooldown
 
     private val api = RetrofitClient.instance
-    private var phone: String = ""
     private var authToken: String? = null
     private var cooldownJob: Job? = null
+
+    // Expose the logged-in phone number so other screens can read it for WhatsApp delivery
+    private val _userPhone = MutableStateFlow("")
+    val userPhone: StateFlow<String> = _userPhone
 
     fun sendOtp(phoneNumber: String) {
         if (phoneNumber.length != 10) {
@@ -41,14 +44,14 @@ class LoginViewModel : ViewModel() {
             )
             return
         }
-        phone = phoneNumber
+        _userPhone.value = phoneNumber
         _loginState.value = LoginState.OtpSending
 
         viewModelScope.launch {
             try {
-                val response = api.requestOtp(OtpRequest(phone = "+91$phone"))
+                val response = api.requestOtp(OtpRequest(phone = "+91${_userPhone.value}"))
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _loginState.value = LoginState.OtpEntry(phone)
+                    _loginState.value = LoginState.OtpEntry(_userPhone.value)
                     startCooldown()
                 } else {
                     var errorMsg = "Failed to send OTP (${response.code()})"
@@ -75,7 +78,7 @@ class LoginViewModel : ViewModel() {
         if (otp.length != 4) {
             _loginState.value = LoginState.Error(
                 "Please enter the 4-digit OTP",
-                LoginState.OtpEntry(phone)
+                LoginState.OtpEntry(_userPhone.value)
             )
             return
         }
@@ -83,18 +86,18 @@ class LoginViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = api.verifyOtp(VerifyOtpRequest(phone = "+91$phone", otp = otp))
+                val response = api.verifyOtp(VerifyOtpRequest(phone = "+91${_userPhone.value}", otp = otp))
                 if (response.isSuccessful && response.body()?.success == true) {
                     authToken = response.body()?.token
                     _loginState.value = LoginState.Verified(authToken)
                 } else {
                     val msg = response.body()?.message ?: "Invalid OTP. Please try again."
-                    _loginState.value = LoginState.Error(msg, LoginState.OtpEntry(phone))
+                    _loginState.value = LoginState.Error(msg, LoginState.OtpEntry(_userPhone.value))
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error(
                     e.localizedMessage ?: "Network error. Check your connection.",
-                    LoginState.OtpEntry(phone)
+                    LoginState.OtpEntry(_userPhone.value)
                 )
             }
         }
@@ -106,9 +109,9 @@ class LoginViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                val response = api.requestOtp(OtpRequest(phone = "+91$phone"))
+                val response = api.requestOtp(OtpRequest(phone = "+91${_userPhone.value}"))
                 if (response.isSuccessful && response.body()?.success == true) {
-                    _loginState.value = LoginState.OtpEntry(phone)
+                    _loginState.value = LoginState.OtpEntry(_userPhone.value)
                     startCooldown()
                 } else {
                     var errorMsg = "Failed to resend OTP (${response.code()})"
@@ -122,13 +125,13 @@ class LoginViewModel : ViewModel() {
                     } catch (e: Exception) {}
                     _loginState.value = LoginState.Error(
                         errorMsg,
-                        LoginState.OtpEntry(phone)
+                        LoginState.OtpEntry(_userPhone.value)
                     )
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error(
                     e.localizedMessage ?: "Network error",
-                    LoginState.OtpEntry(phone)
+                    LoginState.OtpEntry(_userPhone.value)
                 )
             }
         }

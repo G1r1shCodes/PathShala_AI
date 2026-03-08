@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.pathshala.ai.ui.LoginScreen
+import com.pathshala.ai.ui.LoginViewModel
 import com.pathshala.ai.ui.MainViewModel
 import com.pathshala.ai.ui.PathShalaScreen
 import com.pathshala.ai.ui.theme.PathShalaTheme
@@ -26,6 +27,7 @@ import com.pathshala.ai.ui.theme.PathShalaTheme
 class MainActivity : ComponentActivity() {
 
     private val vm: MainViewModel by viewModels()
+    private val loginVm: LoginViewModel by viewModels()
     private lateinit var speechRecognizer: SpeechRecognizer
 
     private val permissionLauncher =
@@ -90,7 +92,9 @@ class MainActivity : ComponentActivity() {
             override fun onResults(results: Bundle?) {
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val best    = matches?.firstOrNull() ?: return
-                vm.generateLesson(best)
+                // Pass the user's +91 phone number for WhatsApp delivery
+                val phone = "+91${loginVm.userPhone.value}"
+                vm.generateLesson(best, whatsappNumber = phone.takeIf { loginVm.userPhone.value.isNotBlank() })
             }
 
             override fun onError(error: Int) {
