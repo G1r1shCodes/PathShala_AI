@@ -1,6 +1,6 @@
 # PathShala AI
 
-**AI for Bharat Hackathon MVP**  
+**AI for Bharat Project Submission Repo**  
 *"GitHub Copilot for India's 1.1 Lakh Rural Teachers"*
 
 PathShala AI is an AI-powered MVP designed to help rural teachers in India generate structured, multi-grade lesson plans in seconds. A teacher can speak their requirements naturally in Hindi or English (e.g., "Aaj mujhe Class 1 ko vowels sikhane hain aur Class 3 ko multiplication table"), and the system instantly returns a high-quality, practical lesson plan.
