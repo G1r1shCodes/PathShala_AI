@@ -46,22 +46,23 @@ val TextMuted   = Color(0xFF757575)
 val TopBarBg    = Color(0xFF121212)
 val BubbleBg    = Color(0xFFF5F5F5)
 
+/**
+ * Speech-bubble pointing DOWN-RIGHT at the FAB centre.
+ * The tail is pinned 32 dp from the right edge of the bubble,
+ * which lines up with the FAB centre (FAB = 64 dp, half = 32 dp).
+ */
 class BubbleShape : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-        val path = Path().apply {
-            val tailH = with(density) { 10.dp.toPx() }
-            val tailW = with(density) { 16.dp.toPx() }
-            val cornerRadius = with(density) { 24.dp.toPx() }
-            
-            addRoundRect(RoundRect(0f, 0f, size.width, size.height - tailH, CornerRadius(cornerRadius)))
-            
-            // Tail points to FAB center. FAB center is 34dp from right of column. 
-            // Bubble right edge is 24dp from right of column. 
-            // So tail is 10dp left from bubble's right edge.
-            val tailCenterX = size.width - with(density) { 10.dp.toPx() }
-            moveTo(tailCenterX - tailW/2, size.height - tailH)
-            lineTo(tailCenterX, size.height)
-            lineTo(tailCenterX + tailW/2, size.height - tailH)
+        val tailH = with(density) { 12.dp.toPx() }
+        val tailW = with(density) { 18.dp.toPx() }
+        val r     = with(density) { 24.dp.toPx() }   // pill-level corners
+        val path  = Path().apply {
+            addRoundRect(RoundRect(0f, 0f, size.width, size.height - tailH, CornerRadius(r)))
+            // Tail centre = 32 dp from bubble right edge (= FAB half-width)
+            val cx = size.width - with(density) { 32.dp.toPx() }
+            moveTo(cx - tailW / 2, size.height - tailH)
+            lineTo(cx,             size.height)
+            lineTo(cx + tailW / 2, size.height - tailH)
             close()
         }
         return Outline.Generic(path)
@@ -101,11 +102,11 @@ fun PathShalaScreen(
     var textInput by remember { mutableStateOf("") }
     var showCallTooltip by remember { mutableStateOf(false) }
 
-    // Tooltip timer: show for 10 seconds on launch
+    // Tooltip shows for 10 s on every fresh launch while user is logged in; FAB stays permanently
     LaunchedEffect(Unit) {
-        delay(1000) // Small delay for entrance
+        delay(500L)
         showCallTooltip = true
-        delay(10000)
+        delay(10_000L)
         showCallTooltip = false
     }
 
@@ -135,51 +136,95 @@ fun PathShalaScreen(
             )
         },
         floatingActionButton = {
+            // Pulse animation — visible only while tooltip is showing
+            val infinitePulse = rememberInfiniteTransition(label = "fabPulse")
+            val pulseScale by infinitePulse.animateFloat(
+                initialValue = 1f,
+                targetValue  = 1.35f,
+                animationSpec = infiniteRepeatable(
+                    tween(900, easing = FastOutSlowInEasing),
+                    RepeatMode.Reverse
+                ),
+                label = "pulseScale"
+            )
+
             Column(
                 horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(bottom = 16.dp, end = 12.dp)
+                modifier = Modifier.padding(bottom = 16.dp, end = 16.dp)
             ) {
-                // Tooltip Bubble
+
+                // ── Tooltip bubble ─────────────────────────────────────────
                 AnimatedVisibility(
                     visible = showCallTooltip,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically()
+                    enter   = fadeIn(tween(350)) + slideInVertically(tween(350)) { it / 4 },
+                    exit    = fadeOut(tween(250))
                 ) {
                     Surface(
-                        color = BubbleBg,
-                        shape = BubbleShape(),
-                        border = BorderStroke(1.5.dp, Color.Black),
-                        modifier = Modifier
-                            .padding(bottom = 4.dp, end = 24.dp)
-                            .widthIn(max = 280.dp)
+                        color           = Color.White,
+                        shape           = BubbleShape(),
+                        border          = BorderStroke(1.5.dp, Color(0xFF1A1A1A)),
+                        shadowElevation = 6.dp,
+                        modifier        = Modifier.widthIn(min = 200.dp, max = 260.dp)
                     ) {
-                        Text(
-                            "Get the Lesson Plan on Call",
-                            color = Color.Black,
-                            fontSize = 13.sp,
-                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 22.dp),
-                            fontWeight = FontWeight.ExtraBold,
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            verticalAlignment    = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(
+                                start  = 18.dp,
+                                end    = 18.dp,
+                                top    = 12.dp,
+                                bottom = 24.dp   // space for the tail
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.Phone,
+                                contentDescription = null,
+                                tint     = Color(0xFF1A1A1A),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text       = "Get the Lesson Plan on Call",
+                                color      = Color(0xFF1A1A1A),
+                                fontSize   = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign  = TextAlign.Center
+                            )
+                        }
                     }
                 }
 
-                // Floating Call Icon (Black circle)
-                FloatingActionButton(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
-                        context.startActivity(intent)
-                    },
-                    containerColor = Color.Black,
-                    contentColor = Color.White,
-                    shape = CircleShape,
-                    modifier = Modifier.size(68.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Phone,
-                        contentDescription = "Call AI",
-                        modifier = Modifier.size(34.dp)
-                    )
+                Spacer(Modifier.height(4.dp))
+
+                // ── FAB with pulse ring ─────────────────────────────────────
+                Box(contentAlignment = Alignment.Center) {
+                    // Pulse ring — only drawn while tooltip is visible
+                    if (showCallTooltip) {
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .scale(pulseScale)
+                                .clip(CircleShape)
+                                .background(Color(0xFF1A1A1A).copy(alpha = 0.18f))
+                        )
+                    }
+                    FloatingActionButton(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
+                            context.startActivity(intent)
+                        },
+                        containerColor = Color(0xFF1A1A1A),
+                        contentColor   = Color.White,
+                        shape          = CircleShape,
+                        elevation      = FloatingActionButtonDefaults.elevation(8.dp, 10.dp),
+                        modifier       = Modifier.size(64.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Phone,
+                            contentDescription = "Call for Lesson Plan",
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
         }
