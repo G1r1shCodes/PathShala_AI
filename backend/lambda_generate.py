@@ -111,7 +111,7 @@ def send_whatsapp_sync(lesson_text: str, whatsapp_number: str):
         req.add_header("Authorization", f"Basic {auth}")
         req.add_header("Content-Type", "application/x-www-form-urlencoded")
         
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             logger.info(f"Twilio REST status: {response.status}")
     except Exception as e:
         logger.error(f"WhatsApp failed: {e}")
@@ -171,7 +171,7 @@ def get_gemini_lesson(transcript: str) -> dict:
             req = urllib.request.Request(url, data=data)
             req.add_header("Content-Type", "application/json")
             
-            with urllib.request.urlopen(req) as response:
+            with urllib.request.urlopen(req, timeout=15) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
                 lesson_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
                 
