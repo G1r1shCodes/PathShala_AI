@@ -9,16 +9,16 @@ PathShala AI is an AI-powered MVP designed to help rural teachers in India gener
 
 *   **Multilingual Support**: Primary focus on Hindi, with English support.
 *   **Multi-Channel Delivery**:
-    *   **Android App**: Voice input, screen display, and Text-to-Speech (TTS) playback.
-    *   **Phone Call**: Direct integration over voice via Twilio.
+    *   **Android App**: Voice input, screen display, and Text-to-Speech playback. 
+    *   **Phone Call**: Direct integration over voice via Twilio — built-in floating dialer FAB with interactive tooltip.
     *   **WhatsApp**: Asynchronous delivery of structured lesson plans directly to the teacher's WhatsApp.
-*   **Speed & Quality**: Generates context-aware, NCERT-aligned, rural-optimized plans in under 15 seconds using Anthropic Claude via AWS Bedrock.
+*   **Speed & Quality**: Generates context-aware, NCERT-aligned, rural-optimized plans in under 15 seconds using powerful reasoning models.
 
 ## 🛠️ Tech Stack
 
-*   **Backend**: Python, FastAPI
-*   **Frontend**: Native Android (Kotlin, Retrofit)
-*   **AI Engine**: Anthropic Claude 3.5 Sonnet (via AWS Bedrock)
+*   **Backend Services**: AWS Lambda (Python serverless architecture)
+*   **Frontend**: Native Android (Kotlin, Jetpack Compose, Retrofit)
+*   **AI Engine**: Gemini 2.5 Flash / Claude 3.5 Sonnet
 *   **Communications**: Twilio Voice API & WhatsApp API
 
 ---
@@ -38,30 +38,16 @@ Since this project currently uses a Twilio Trial account, we cannot send message
 
 ## 💻 Setup & Installation
 
-The project is divided into two primary parts: the FastAPI backend and the Native Android app.
+**Note**: The Python backend has been migrated to AWS Lambda and removed from this repository. This repo now exclusively hosts the Frontend Android App.
 
-### 1. Backend
+To test the application instantly without building:
+1. Go to the [Releases page](https://github.com/G1r1shCodes/PathShala_AI/releases)
+2. Download the latest `PathShala-AI.apk`
+3. Install and run on your Android device.
 
-1.  Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
-2.  Set up a Python virtual environment and install dependencies:
-    ```bash
-    python -m venv venv
-    venv\Scripts\activate  # On Windows
-    pip install -r requirements.txt
-    ```
-3.  Configure Environment Variables:
-    Copy the `.env.example` to `.env` and fill in the required keys:
-    *   `AWS_ACCESS_KEY_ID` & `AWS_SECRET_ACCESS_KEY` (for Bedrock capability)
-    *   `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_WHATSAPP_NUMBER`
-4.  Run the server:
-    ```bash
-    uvicorn main:app --reload --host 0.0.0.0 --port 8000
-    ```
+### Frontend Development (Android)
 
-### 2. Frontend (Android)
+If you wish to build the app from source:
 
 1.  Open **Android Studio**.
 2.  Select **Open** and choose the `frontend/` directory of this repository.
