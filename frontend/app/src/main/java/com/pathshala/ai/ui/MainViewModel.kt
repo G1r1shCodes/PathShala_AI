@@ -45,7 +45,7 @@ class MainViewModel : ViewModel() {
 
     fun generateLesson(
         transcriptText: String,
-        whatsappNumber: String = "+916369631956"
+        whatsappNumber: String? = null
     ) {
         if (transcriptText.isBlank()) return
         _uiState.value = UiState.Processing

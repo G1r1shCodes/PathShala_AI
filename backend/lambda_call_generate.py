@@ -215,9 +215,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             logger.warning("No call_sid — skipping call update")
 
         # 3. Side effects
-        demo_number = os.environ.get("TWILIO_WHATSAPP_TO", "+916369631956")
+        demo_number = os.environ.get("TWILIO_WHATSAPP_TO")
         save_to_dynamo_sync(speech_result, lesson, lang_code)
-        send_whatsapp_sync(lesson, demo_number)
+        if demo_number:
+            send_whatsapp_sync(lesson, demo_number)
 
         return {"statusCode": 200, "body": json.dumps({"success": True})}
 
