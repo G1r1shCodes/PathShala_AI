@@ -49,12 +49,16 @@ val BubbleBg    = Color(0xFFF5F5F5)
 class BubbleShape : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
         val path = Path().apply {
-            val tailH = 25f
-            val tailW = 35f
-            addRoundRect(RoundRect(0f, 0f, size.width, size.height - tailH, CornerRadius(50f)))
-            moveTo(size.width - 70f, size.height - tailH)
-            lineTo(size.width - 30f, size.height)
-            lineTo(size.width - 35f, size.height - tailH)
+            val tailH = 20f
+            val tailW = 30f
+            val cornerRadius = 60f
+            addRoundRect(RoundRect(0f, 0f, size.width, size.height - tailH, CornerRadius(cornerRadius)))
+            
+            // Tail centered relative to the bubble
+            val tailCenterX = size.width / 2
+            moveTo(tailCenterX - tailW/2, size.height - tailH)
+            lineTo(tailCenterX, size.height)
+            lineTo(tailCenterX + tailW/2, size.height - tailH)
             close()
         }
         return Outline.Generic(path)
@@ -129,8 +133,8 @@ fun PathShalaScreen(
         },
         floatingActionButton = {
             Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(bottom = 16.dp, end = 8.dp)
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(bottom = 24.dp, end = 24.dp)
             ) {
                 // Tooltip Bubble
                 AnimatedVisibility(
@@ -141,23 +145,23 @@ fun PathShalaScreen(
                     Surface(
                         color = BubbleBg,
                         shape = BubbleShape(),
-                        border = BorderStroke(1.2.dp, Color.Black),
+                        border = BorderStroke(1.5.dp, Color.Black),
                         modifier = Modifier
-                            .padding(bottom = 4.dp)
-                            .widthIn(min = 180.dp)
+                            .padding(bottom = 8.dp)
+                            .widthIn(max = 240.dp)
                     ) {
                         Text(
                             "Get the Lesson Plan on Call",
                             color = Color.Black,
                             fontSize = 13.sp,
-                            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 18.dp),
-                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 22.dp),
+                            fontWeight = FontWeight.ExtraBold,
                             textAlign = TextAlign.Center
                         )
                     }
                 }
 
-                // Floating Call Icon (Black circle as per user screenshot)
+                // Floating Call Icon (Black circle)
                 FloatingActionButton(
                     onClick = {
                         val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
@@ -166,12 +170,12 @@ fun PathShalaScreen(
                     containerColor = Color.Black,
                     contentColor = Color.White,
                     shape = CircleShape,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier.size(68.dp)
                 ) {
                     Icon(
                         Icons.Default.Phone,
                         contentDescription = "Call AI",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(34.dp)
                     )
                 }
             }
