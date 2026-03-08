@@ -9,7 +9,8 @@ android {
 
     defaultConfig {
         applicationId "com.pathshala.ai"
-        minSdk 24
+        // Supporting Android 5.0+ (API 21) to cover Android 7 and old devices
+        minSdk 21
         targetSdk 35
         versionCode 1
         versionName "1.0-mvp"
@@ -20,12 +21,23 @@ android {
         }
 
         buildConfigField "String", "BASE_URL", "\"https://pathshala-ai.onrender.com/\""
+        
+        // MultiDex is essential for Compose apps on older minSdk levels
+        multiDexEnabled true
+
+        // Crucial for Pixel 6a (64-bit) and older phones (32-bit)
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
         }
     }
 
@@ -69,6 +81,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
     implementation 'androidx.activity:activity-compose:1.8.2'
+    
+    // Multidex support for older Android versions
+    implementation 'androidx.multidex:multidex:2.0.1'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'

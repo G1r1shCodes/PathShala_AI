@@ -52,6 +52,7 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\giris\.gradle\cach
 MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\giris\.gradle\caches\transforms-4\8223119550d7128e506d99b5c730e8de\transformed\jetified-tracing-1.0.0\AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\giris\.gradle\caches\transforms-4\220f00bada1479d21dbf685225e2763a\transformed\interpolator-1.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\giris\.gradle\caches\transforms-4\000f70ba4f31d84dc8014a94b76b428a\transformed\core-runtime-2.2.0\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.multidex:multidex:2.0.1] C:\Users\giris\.gradle\caches\transforms-4\9cb1fc6e1a2ae3804714b100fe53fee9\transformed\multidex-2.0.1\AndroidManifest.xml:17:1-22:12
 	package
 		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 	android:versionName
@@ -221,6 +222,8 @@ MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\giris\.gradle\ca
 MERGED from [androidx.interpolator:interpolator:1.0.0] C:\Users\giris\.gradle\caches\transforms-4\220f00bada1479d21dbf685225e2763a\transformed\interpolator-1.0.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\giris\.gradle\caches\transforms-4\000f70ba4f31d84dc8014a94b76b428a\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] C:\Users\giris\.gradle\caches\transforms-4\000f70ba4f31d84dc8014a94b76b428a\transformed\core-runtime-2.2.0\AndroidManifest.xml:20:5-44
+MERGED from [androidx.multidex:multidex:2.0.1] C:\Users\giris\.gradle\caches\transforms-4\9cb1fc6e1a2ae3804714b100fe53fee9\transformed\multidex-2.0.1\AndroidManifest.xml:20:5-43
+MERGED from [androidx.multidex:multidex:2.0.1] C:\Users\giris\.gradle\caches\transforms-4\9cb1fc6e1a2ae3804714b100fe53fee9\transformed\multidex-2.0.1\AndroidManifest.xml:20:5-43
 	android:targetSdkVersion
 		INJECTED from C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml
 	android:minSdkVersion

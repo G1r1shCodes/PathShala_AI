@@ -5,7 +5,7 @@
 5    android:versionName="1.0-mvp" >
 6
 7    <uses-sdk
-8        android:minSdkVersion="24"
+8        android:minSdkVersion="21"
 9        android:targetSdkVersion="35" />
 10
 11    <uses-permission android:name="android.permission.INTERNET" />
@@ -33,7 +33,7 @@
 22        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
 22-->[androidx.core:core:1.13.1] C:\Users\giris\.gradle\caches\transforms-4\74714178b00ba501e7cc193af1cf356e\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 23        android:debuggable="true"
-24        android:extractNativeLibs="false"
+24        android:extractNativeLibs="true"
 25        android:label="PathShala AI"
 25-->C:\Users\giris\Desktop\PathShala AI\PathShala AI\frontend\app\src\main\AndroidManifest.xml:9:9-37
 26        android:networkSecurityConfig="@xml/network_security_config"
