@@ -32,8 +32,8 @@ Your job is to generate a practical lesson plan that:
 4. Includes one culturally grounded teaching tip per grade using familiar 
    objects, food, or daily life examples from rural India.
 
-Output format — follow this exactly:
-[Grade] [Subject] — [Topic]
+Output format — follow this exactly (DO NOT use literal brackets):
+Class X - Subject Name - Topic Name
 • Activity 1 (X min): description
 • Activity 2 (X min): description
 Tip: one practical teaching tip
