@@ -51,8 +51,16 @@ class LoginViewModel : ViewModel() {
                     _loginState.value = LoginState.OtpEntry(phone)
                     startCooldown()
                 } else {
-                    val msg = response.body()?.message ?: "Failed to send OTP (${response.code()})"
-                    _loginState.value = LoginState.Error(msg, LoginState.PhoneEntry)
+                    var errorMsg = "Failed to send OTP (${response.code()})"
+                    try {
+                        response.errorBody()?.string()?.let {
+                            val json = org.json.JSONObject(it)
+                            if (json.has("message")) {
+                                errorMsg = json.getString("message")
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    _loginState.value = LoginState.Error(errorMsg, LoginState.PhoneEntry)
                 }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error(
@@ -103,8 +111,17 @@ class LoginViewModel : ViewModel() {
                     _loginState.value = LoginState.OtpEntry(phone)
                     startCooldown()
                 } else {
+                    var errorMsg = "Failed to resend OTP (${response.code()})"
+                    try {
+                        response.errorBody()?.string()?.let {
+                            val json = org.json.JSONObject(it)
+                            if (json.has("message")) {
+                                errorMsg = json.getString("message")
+                            }
+                        }
+                    } catch (e: Exception) {}
                     _loginState.value = LoginState.Error(
-                        response.body()?.message ?: "Failed to resend OTP",
+                        errorMsg,
                         LoginState.OtpEntry(phone)
                     )
                 }
