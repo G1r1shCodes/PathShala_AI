@@ -70,7 +70,7 @@ def get_gemini_lesson(transcript: str) -> dict:
     lang_instruction = "महत्वपूर्ण: पूरा जवाब हिंदी में दें। कोई भी शब्द अंग्रेज़ी में न लिखें।" if language == "hi" else "Respond in English."
     full_prompt = f"{SYSTEM_PROMPT}\n\n{lang_instruction}\n\nTeacher's request: {transcript}"
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     payload = {"contents": [{"parts": [{"text": full_prompt}]}]}
     data = json.dumps(payload).encode("utf-8")
 
@@ -79,7 +79,7 @@ def get_gemini_lesson(transcript: str) -> dict:
         try:
             req = urllib.request.Request(url, data=data)
             req.add_header("Content-Type", "application/json")
-            with urllib.request.urlopen(req) as response:
+            with urllib.request.urlopen(req, timeout=15) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
                 lesson_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
                 
@@ -125,7 +125,7 @@ def update_call_with_lesson(call_sid: str, lesson: str, tts_lang: str):
     req.add_header("Content-Type", "application/x-www-form-urlencoded")
 
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=15) as resp:
             logger.info(f"Call updated successfully: {resp.status}")
     except Exception as e:
         logger.error(f"Failed to update call {call_sid}: {e}")
