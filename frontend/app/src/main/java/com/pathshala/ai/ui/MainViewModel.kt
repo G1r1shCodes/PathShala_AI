@@ -63,7 +63,7 @@ class MainViewModel : ViewModel() {
                     text = transcriptText,
                     transcript = transcriptText,
                     language = detectLanguage(transcriptText),
-                    whatsapp_number = whatsappNumber
+                    whatsapp_number = whatsappNumber ?: ""
                 )
                 val response = api.generateLesson(request)
                 if (response.isSuccessful && response.body() != null) {

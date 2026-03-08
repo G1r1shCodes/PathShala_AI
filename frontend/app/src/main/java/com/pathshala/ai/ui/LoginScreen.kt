@@ -207,7 +207,7 @@ private fun PhoneEntrySection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Default.WhatsApp,
+                        Icons.Default.Chat,
                         contentDescription = null,
                         tint = Color(0xFF25D366),
                         modifier = Modifier.size(22.dp)
@@ -282,7 +282,7 @@ private fun PhoneEntrySection(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
                             shape = RoundedCornerShape(10.dp)
                         ) {
-                            Icon(Icons.Default.WhatsApp, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
                             Text("Open WhatsApp & Join Sandbox", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
