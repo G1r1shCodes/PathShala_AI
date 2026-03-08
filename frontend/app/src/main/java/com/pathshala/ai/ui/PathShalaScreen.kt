@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pathshala.ai.model.LessonResponse
 import com.pathshala.ai.ui.LoginViewModel
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 // ─── COLOR PALETTE ────────────────────────────────────────────────────────────
 val Saffron     = Color(0xFFFF6B00)
@@ -68,6 +69,15 @@ fun PathShalaScreen(
     DisposableEffect(Unit) { onDispose { tts?.shutdown() } }
 
     var textInput by remember { mutableStateOf("") }
+    var showCallTooltip by remember { mutableStateOf(false) }
+
+    // Tooltip timer: show for 3 seconds on launch
+    LaunchedEffect(Unit) {
+        delay(1000) // Small delay for entrance
+        showCallTooltip = true
+        delay(3000)
+        showCallTooltip = false
+    }
 
     Scaffold(
         topBar = {
@@ -93,6 +103,52 @@ fun PathShalaScreen(
                     containerColor = TopBarBg
                 )
             )
+        },
+        floatingActionButton = {
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.padding(bottom = 16.dp, end = 8.dp)
+            ) {
+                // Tooltip Bubble
+                AnimatedVisibility(
+                    visible = showCallTooltip,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Surface(
+                        color = Color(0xFFF5F5F5),
+                        shape = RoundedCornerShape(12.dp),
+                        shadowElevation = 4.dp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        Text(
+                            "Get the Lesson Plan on Call",
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+
+                // Floating Call Icon (Black circle as per user screenshot)
+                FloatingActionButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
+                        context.startActivity(intent)
+                    },
+                    containerColor = Color.Black,
+                    contentColor = Color.White,
+                    shape = CircleShape,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Phone,
+                        contentDescription = "Call AI",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         Column(
@@ -156,21 +212,15 @@ fun PathShalaScreen(
             Text("— या / OR —", color = TextMuted, fontSize = 12.sp)
             Spacer(Modifier.height(20.dp))
 
-            // ── Interaction Card (Mic & Call) ───────────────────────────────────
+            // ── Interaction Card (App Voice) ───────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(2.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp, horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Option A: App Voice (Mic)
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         MicButton(
@@ -184,67 +234,18 @@ fun PathShalaScreen(
                                 is UiState.Processing -> "⚙️ Processing..."
                                 else                  -> "App Voice 🎤"
                             },
-                            fontSize = 14.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (uiState is UiState.Listening) Color.Red else TextPrimary
                         )
                         Text(
                             "Record request",
-                            fontSize = 12.sp,
-                            color = TextMuted,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    // Elegant Divider
-                    Box(
-                        modifier = Modifier
-                            .height(100.dp)
-                            .width(1.2.dp)
-                            .background(Color(0xFFEEEEEE))
-                    )
-
-                    // Option B: Direct Call
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .size(74.dp)
-                                .clickable {
-                                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
-                                    context.startActivity(intent)
-                                },
-                            shape = CircleShape,
-                            color = Color(0xFF2E7D32), // Professional Green
-                            shadowElevation = 4.dp
-                        ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                                Icon(
-                                    Icons.Default.Phone, 
-                                    contentDescription = "Direct Call", 
-                                    tint = Color.White, 
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(14.dp))
-                        Text(
-                            "Direct Call 📞",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                        Text(
-                            "Over phone line",
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             color = TextMuted,
                             textAlign = TextAlign.Center
                         )
                     }
                 }
-            }
 
 
             Spacer(Modifier.height(32.dp))
