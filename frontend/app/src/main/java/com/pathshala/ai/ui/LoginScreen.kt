@@ -167,7 +167,7 @@ private fun PhoneEntrySection(
     // ─── Twilio Sandbox config ───────────────────────────────────────────────
     // UPDATE these two constants with your actual Twilio Sandbox values!
     val sandboxNumber = "14155238886"   // Twilio Sandbox WhatsApp number (no +)
-    val sandboxKeyword = "join <your-keyword>" // e.g. "join dusty-lion"
+    val sandboxKeyword = "join studying-foot"
     // ────────────────────────────────────────────────────────────────────────
 
     Column(
