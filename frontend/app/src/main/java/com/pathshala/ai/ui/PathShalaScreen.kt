@@ -156,42 +156,74 @@ fun PathShalaScreen(
             Text("— या / OR —", color = TextMuted, fontSize = 12.sp)
             Spacer(Modifier.height(20.dp))
 
-            // ── Mic Button ───────────────────────────────────────────────────────
-            MicButton(
-                state = uiState,
-                onClick = onMicClick
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            // ── Call AI Button ───────────────────────────────────────────────────
-            Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
-                    context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                shape = RoundedCornerShape(8.dp)
+            // ── Interaction Row (Mic & Call) ───────────────────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.Top
             ) {
-                Icon(Icons.Default.Phone, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Call AI Co-Teacher 📞", fontWeight = FontWeight.SemiBold)
-            }
+                // Option A: App Voice (Mic)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    MicButton(
+                        state = uiState,
+                        onClick = onMicClick
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        when (uiState) {
+                            is UiState.Listening  -> "🔴 Listening..."
+                            is UiState.Processing -> "⚙️ Processing..."
+                            else                  -> "App Voice 🎤"
+                        },
+                        fontSize = 13.sp,
+                        color = if (uiState is UiState.Listening) Color.Red else TextMuted,
+                        fontWeight = if (uiState is UiState.Listening) FontWeight.Bold else FontWeight.Medium
+                    )
+                    if (uiState !is UiState.Listening && uiState !is UiState.Processing) {
+                        Text("Tap to speak", fontSize = 11.sp, color = TextMuted.copy(alpha = 0.7f))
+                    }
+                }
 
-            Spacer(Modifier.height(12.dp))
-            Text(
-                when (uiState) {
-                    is UiState.Listening   -> "🔴 सुन रहा हूँ... / Listening..."
-                    is UiState.Processing  -> "⚙️ तैयार हो रहा है... / Processing..."
-                    else                   -> "🎤 बोलने के लिए दबाएँ / Tap to speak"
-                },
-                color = if (uiState is UiState.Listening) Color.Red else TextMuted,
-                fontSize = 14.sp,
-                fontWeight = if (uiState is UiState.Listening) FontWeight.Bold else FontWeight.Normal
-            )
+                // Divider
+                Box(
+                    modifier = Modifier
+                        .height(80.dp)
+                        .width(1.dp)
+                        .background(Color.LightGray.copy(alpha = 0.3f))
+                )
+
+                // Option B: Direct Call
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Surface(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clickable {
+                                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+18135678797"))
+                                context.startActivity(intent)
+                            },
+                        shape = CircleShape,
+                        color = Color(0xFF2E7D32),
+                        shadowElevation = 8.dp
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Icon(
+                                Icons.Default.Phone, 
+                                contentDescription = "Direct Call", 
+                                tint = Color.White, 
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "Direct Call 📞", 
+                        fontSize = 13.sp, 
+                        color = TextMuted,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text("Over phone line", fontSize = 11.sp, color = TextMuted.copy(alpha = 0.7f))
+                }
+            }
 
 
             Spacer(Modifier.height(32.dp))
