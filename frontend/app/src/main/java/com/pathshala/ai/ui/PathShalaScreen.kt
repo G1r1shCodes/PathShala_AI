@@ -73,7 +73,7 @@ class BubbleShape : Shape {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PathShalaScreen(
-    onMicClick: () -> Unit,
+    onMicClick: (lang: String) -> Unit,
     onLogout: () -> Unit,
     vm: MainViewModel = viewModel(),
     loginVm: LoginViewModel = viewModel()
@@ -96,10 +96,17 @@ fun PathShalaScreen(
             }
         }
     }
-    DisposableEffect(Unit) { onDispose { tts?.shutdown() } }
-
     var textInput by remember { mutableStateOf("") }
     var showCallTooltip by remember { mutableStateOf(false) }
+    // Teacher-selected language: "en-IN" (English) or "hi-IN" (Hindi)
+    var selectedLang by remember { mutableStateOf("en-IN") }
+    var langMenuExpanded by remember { mutableStateOf(false) }
+
+    // Update TTS locale when teacher switches language
+    LaunchedEffect(selectedLang) {
+        tts?.setLanguage(if (selectedLang == "hi-IN") Locale("hi", "IN") else Locale.ENGLISH)
+    }
+    DisposableEffect(Unit) { onDispose { tts?.shutdown() } }
 
     // Tooltip shows for 10 s on every fresh launch while user is logged in; FAB stays permanently
     LaunchedEffect(Unit) {
@@ -289,45 +296,79 @@ fun PathShalaScreen(
             Text("— या / OR —", color = TextMuted, fontSize = 12.sp)
             Spacer(Modifier.height(20.dp))
 
-            // ── Interaction Card (App Voice) ───────────────────────────────────
+            // ── Voice Card with Language Selector ───────────────────────────────
             Card(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        MicButton(
-                            state = uiState,
-                            onClick = onMicClick
-                        )
-                        Spacer(Modifier.height(14.dp))
-                        Text(
-                            when (uiState) {
-                                is UiState.Listening  -> "🔴 Listening..."
-                                is UiState.Processing -> "⚙️ Processing..."
-                                else                  -> "App Voice 🎤"
-                            },
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (uiState is UiState.Listening) Color.Red else TextPrimary
-                        )
-                        Text(
-                            "Record request",
-                            fontSize = 13.sp,
-                            color = TextMuted,
-                            textAlign = TextAlign.Center
-                        )
+                    // Language selector row
+                    Box {
+                        OutlinedButton(
+                            onClick = { langMenuExpanded = true },
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = if (selectedLang == "hi-IN") "भाषा: हिन्दी" else "Language: English",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Select language",
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = langMenuExpanded,
+                            onDismissRequest = { langMenuExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("हिन्दी", fontSize = 14.sp) },
+                                onClick = { selectedLang = "hi-IN"; langMenuExpanded = false },
+                                leadingIcon = {
+                                    if (selectedLang == "hi-IN")
+                                        Icon(Icons.Default.Check, null, tint = Saffron, modifier = Modifier.size(16.dp))
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("English", fontSize = 14.sp) },
+                                onClick = { selectedLang = "en-IN"; langMenuExpanded = false },
+                                leadingIcon = {
+                                    if (selectedLang == "en-IN")
+                                        Icon(Icons.Default.Check, null, tint = Saffron, modifier = Modifier.size(16.dp))
+                                }
+                            )
+                        }
                     }
+                    Spacer(Modifier.height(20.dp))
+                    MicButton(state = uiState, onClick = { onMicClick(selectedLang) })
+                    Spacer(Modifier.height(14.dp))
+                    Text(
+                        when (uiState) {
+                            is UiState.Listening  -> "🔴 Listening..."
+                            is UiState.Processing -> "⚙️ Processing..."
+                            else                  -> "App Voice 🎤"
+                        },
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (uiState is UiState.Listening) Color.Red else TextPrimary
+                    )
+                    Text("Record request", fontSize = 13.sp, color = TextMuted, textAlign = TextAlign.Center)
                 }
+            }
 
+            Spacer(Modifier.height(24.dp))
 
-            Spacer(Modifier.height(32.dp))
-
-            // ── Loading ──────────────────────────────────────────────────────────
             AnimatedVisibility(
                 visible = uiState is UiState.Processing,
                 enter = fadeIn() + expandVertically(),

@@ -45,7 +45,8 @@ class MainViewModel : ViewModel() {
 
     fun generateLesson(
         transcriptText: String,
-        whatsappNumber: String? = null
+        whatsappNumber: String? = null,
+        explicitLang: String? = null   // teacher's explicit UI language choice
     ) {
         if (transcriptText.isBlank()) return
         _uiState.value = UiState.Processing
@@ -62,7 +63,7 @@ class MainViewModel : ViewModel() {
                 val request = LessonRequest(
                     text = transcriptText,
                     transcript = transcriptText,
-                    language = detectLanguage(transcriptText),
+                    language = explicitLang ?: detectLanguage(transcriptText),
                     whatsapp_number = whatsappNumber ?: ""
                 )
                 val response = api.generateLesson(request)
@@ -100,7 +101,8 @@ class MainViewModel : ViewModel() {
 
     private fun detectLanguage(text: String): String {
         val devanagariRange = '\u0900'..'\u097F'
-        return if (text.any { it in devanagariRange }) "hi" else "en"
+        val count = text.count { it in devanagariRange }
+        return if (count >= 3) "hi" else "en"
     }
 
     private fun getMockLessonResponse(query: String): LessonResponse {

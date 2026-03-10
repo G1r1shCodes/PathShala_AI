@@ -29,10 +29,11 @@ class MainActivity : ComponentActivity() {
     private val vm: MainViewModel by viewModels()
     private val loginVm: LoginViewModel by viewModels()
     private lateinit var speechRecognizer: SpeechRecognizer
+    private var lastUsedLang: String = "en-IN"  // tracks which language teacher selected
 
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) startListening() else {
+            if (granted) startListening(lastUsedLang) else {
                 Toast.makeText(this, "Mic permission needed for voice input", Toast.LENGTH_SHORT).show()
                 vm.setIdle()
             }
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
                     ) { loggedIn ->
                         if (loggedIn) {
                             PathShalaScreen(
-                                onMicClick = { onMicPressed() },
+                                onMicClick = { lang -> onMicPressed(lang) },
                                 onLogout = {
                                     prefs.edit().remove("USER_PHONE").apply()
                                     isLoggedIn = false
@@ -87,10 +88,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun onMicPressed() {
+    private fun onMicPressed(lang: String) {
         when {
             ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                    == PackageManager.PERMISSION_GRANTED -> startListening()
+                    == PackageManager.PERMISSION_GRANTED -> startListening(lang)
             else -> permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
@@ -106,9 +107,13 @@ class MainActivity : ComponentActivity() {
             override fun onResults(results: Bundle?) {
                 val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val best    = matches?.firstOrNull() ?: return
-                // Pass the user's +91 phone number for WhatsApp delivery
                 val phone = "+91${loginVm.userPhone.value}"
-                vm.generateLesson(best, whatsappNumber = phone.takeIf { loginVm.userPhone.value.isNotBlank() })
+                // Pass the teacher's chosen language explicitly — no auto-detection
+                vm.generateLesson(
+                    best,
+                    whatsappNumber = phone.takeIf { loginVm.userPhone.value.isNotBlank() },
+                    explicitLang   = lastUsedLang
+                )
             }
 
             override fun onError(error: Int) {
@@ -132,12 +137,15 @@ class MainActivity : ComponentActivity() {
         })
     }
 
-    private fun startListening() {
+    private fun startListening(lang: String) {
+        lastUsedLang = lang  // remember for onResults callback
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            // Remove the hardcoded "hi-IN" override so it uses the system default 
-            // and allows the Android Google App to do standard auto-detection of Eng/Hindi.
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+            // Use the teacher's explicitly chosen language — no auto-detect ambiguity
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE,              lang)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,   lang)
+            putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, false)
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,           3)
         }
         speechRecognizer.startListening(intent)
     }

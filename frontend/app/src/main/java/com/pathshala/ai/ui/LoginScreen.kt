@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import android.content.Intent
 import android.net.Uri
+import kotlinx.coroutines.delay
 
 // ─── LOGIN SCREEN ────────────────────────────────────────────────────────────
 @Composable
@@ -42,9 +43,10 @@ fun LoginScreen(
     val cooldown by loginVm.resendCooldown.collectAsState()
     var showOnboarding by remember { mutableStateOf(true) }
 
-    // Navigate on verified
+    // Navigate on verified after a short delay for animation
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Verified) {
+            delay(1500) // Let the success checkmark show for 1.5 seconds
             onLoginSuccess()
         }
     }
@@ -656,6 +658,15 @@ private fun ErrorSection(message: String, onDismiss: () -> Unit) {
 @Composable
 private fun VerifiedSection() {
     val infiniteTransition = rememberInfiniteTransition(label = "check")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            tween(600, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ),
+        label = "checkScale"
+    )
 
     Column(
         modifier = Modifier
