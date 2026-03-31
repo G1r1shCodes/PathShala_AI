@@ -5,13 +5,13 @@
 
 PathShala AI is an AI-powered MVP designed to help rural teachers in India generate structured, multi-grade lesson plans in seconds. A teacher can speak their requirements naturally in Hindi or English (e.g., "Aaj mujhe Class 1 ko vowels sikhane hain aur Class 3 ko multiplication table"), and the system instantly returns a high-quality, practical lesson plan.
 
-## � Project Context
+## Project Context
 
 India has **1,10,000 single-teacher schools** where one teacher manages Grades 1–5 simultaneously (60 students, 5 subjects) with no setup, internet, or support staff. Writing 5 lesson plans by hand every evening creates a crushing 2-hour daily administrative burden that drives teacher burnout.
 
 PathShala AI solves this by giving every teacher an AI co-teacher. Unlike generic chatbots, the system encodes multi-grade pedagogic constraints (parallel activities) into an LLM and is accessible directly via Voice or Android App, specifically optimized for rural India's low-resource environments.
 
-## �🚀 Key Features
+## 🚀 Key Features
 
 *   **Multilingual Support**: Primary focus on Hindi, with English support.
 *   **Multi-Channel Delivery**:
