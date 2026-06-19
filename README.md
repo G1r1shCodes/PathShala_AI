@@ -11,7 +11,7 @@ India has **1,10,000 single-teacher schools** where one teacher manages Grades 1
 
 PathShala AI solves this by giving every teacher an AI co-teacher. Unlike generic chatbots, the system encodes multi-grade pedagogic constraints (parallel activities) into an LLM and is accessible directly via Voice or Android App, specifically optimized for rural India's low-resource environments.
 
-## 🚀 Key Features
+##  Key Features
 
 *   **Multilingual Support**: Primary focus on Hindi, with English support.
 *   **Multi-Channel Delivery**:
@@ -20,7 +20,7 @@ PathShala AI solves this by giving every teacher an AI co-teacher. Unlike generi
     *   **WhatsApp**: Asynchronous delivery of structured lesson plans directly to the teacher's WhatsApp.
 *   **Speed & Quality**: Generates context-aware, NCERT-aligned, rural-optimized plans in under 15 seconds using powerful reasoning models.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 *   **Backend Services**: AWS Lambda (Python serverless architecture)
 *   **Frontend**: Native Android (Kotlin, Jetpack Compose, Retrofit)
@@ -29,7 +29,7 @@ PathShala AI solves this by giving every teacher an AI co-teacher. Unlike generi
 
 ---
 
-## 🧪 Testing the Prototype (For Hackathon Judges)
+##  Testing the Prototype (For Hackathon Judges)
 
 Since this project currently uses a Twilio Trial account, we cannot send messages or OTPs to unverified numbers. To test the WhatsApp OTP and Lesson Plan delivery features yourself, please join our Twilio WhatsApp Sandbox first:
 
@@ -40,7 +40,7 @@ Since this project currently uses a Twilio Trial account, we cannot send message
 
 ---
 
-## 💻 Setup & Installation
+##  Setup & Installation
 
 **Note**: The Python backend has been migrated to AWS Lambda and removed from this repository. This repo now exclusively hosts the Frontend Android App.
 
@@ -59,7 +59,7 @@ If you wish to build the app from source:
 4.  Connect your Android device or start an emulator.
 5.  Click **Run** to build and install the PathShala AI application on your device.
 
-## 📖 Additional Context
+##  Additional Context
 
 For more detailed product requirements, user flow, and API contracts, please refer to the MVP PRD:
 [PathShala AI MVP PRD](PathShala_AI_MVP_PRD.md)
