@@ -31,7 +31,7 @@ PathShala AI solves this by giving every teacher an AI co-teacher. Unlike generi
 
 ##  Testing the Prototype (For Hackathon Judges)
 
-Since this project currently uses a Twilio Trial account, we cannot send messages or OTPs to unverified numbers. To test the WhatsApp OTP and Lesson Plan delivery features yourself, please join our Twilio WhatsApp Sandbox first:
+Since this project currently uses a **Twilio Trial account**, we cannot send messages or OTPs to unverified numbers. To test the WhatsApp OTP and Lesson Plan delivery features yourself, please join our Twilio WhatsApp Sandbox first:
 
 1. **Open WhatsApp** on your phone.
 2. Send the message **`join <message>`** to **`+14155238886`** (Twilio's Sandbox Number).
