@@ -1,11 +1,12 @@
-# PathShala AI
-
+```text
 ██████╗  █████╗ ████████╗██╗  ██╗███████╗██╗  ██╗ █████╗ ██╗      █████╗      █████╗ ██╗
 ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██╔════╝██║  ██║██╔══██╗██║     ██╔══██╗    ██╔══██╗██║
 ██████╔╝███████║   ██║   ███████║███████╗███████║███████║██║     ███████║    ███████║██║
 ██╔═══╝ ██╔══██║   ██║   ██╔══██║╚════██║██╔══██║██╔══██║██║     ██╔══██║    ██╔══██║██║
 ██║     ██║  ██║   ██║   ██║  ██║███████║██║  ██║██║  ██║███████╗██║  ██║    ██║  ██║██║
 ╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝
+```
+
 <p align="center">
   <img src="https://img.shields.io/badge/Hackathon-AI%20for%20Bharat-blue?style=for-the-badge">
   <img src="https://img.shields.io/badge/Android-Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white">
@@ -16,66 +17,70 @@
   <img src="https://img.shields.io/badge/Twilio-Voice%20%26%20WhatsApp-F22F46?style=for-the-badge&logo=twilio&logoColor=white">
 </p>
 
-**AI for Bharat Project Submission Repo**  
-*"GitHub Copilot for India's 1.1 Lakh Rural Teachers"*
+<p align="center">
+  <strong>AI for Bharat Project Submission Repo</strong>
+</p>
 
-PathShala AI is an AI-powered MVP designed to help rural teachers in India generate structured, multi-grade lesson plans in seconds. A teacher can speak their requirements naturally in Hindi or English (e.g., "Aaj mujhe Class 1 ko vowels sikhane hain aur Class 3 ko multiplication table"), and the system instantly returns a high-quality, practical lesson plan.
+<p align="center">
+  <em>"GitHub Copilot for India's 1.1 Lakh Rural Teachers"</em>
+</p>
+
+---
+
+PathShala AI is an AI-powered MVP designed to help rural teachers in India generate structured, multi-grade lesson plans in seconds. A teacher can speak their requirements naturally in Hindi or English, and the system instantly returns a high-quality, practical lesson plan.
 
 ## Project Context
 
-India has **1,10,000 single-teacher schools** where one teacher manages Grades 1–5 simultaneously (60 students, 5 subjects) with no setup, internet, or support staff. Writing 5 lesson plans by hand every evening creates a crushing 2-hour daily administrative burden that drives teacher burnout.
+India has **1,10,000 single-teacher schools** where one teacher manages Grades 1–5 simultaneously. Writing multiple lesson plans every evening creates a significant administrative burden.
 
-PathShala AI solves this by giving every teacher an AI co-teacher. Unlike generic chatbots, the system encodes multi-grade pedagogic constraints (parallel activities) into an LLM and is accessible directly via Voice or Android App, specifically optimized for rural India's low-resource environments.
+PathShala AI acts as an AI co-teacher by generating context-aware, multi-grade lesson plans optimized for low-resource rural environments.
 
-##  Key Features
+## Features
 
-*   **Multilingual Support**: Primary focus on Hindi, with English support.
-*   **Multi-Channel Delivery**:
-    *   **Android App**: Voice input, screen display, and Text-to-Speech playback. 
-    *   **Phone Call**: Direct integration over voice via Twilio — built-in floating dialer FAB with interactive tooltip.
-    *   **WhatsApp**: Asynchronous delivery of structured lesson plans directly to the teacher's WhatsApp.
-*   **Speed & Quality**: Generates context-aware, NCERT-aligned, rural-optimized plans in under 15 seconds using powerful reasoning models.
+- Multilingual support (Hindi and English)
+- Android application with voice input and text-to-speech
+- Phone call interaction via Twilio
+- WhatsApp lesson plan delivery
+- NCERT-aligned lesson generation
+- Response generation in under 15 seconds
 
-##  Tech Stack
+## Tech Stack
 
-*   **Backend Services**: AWS Lambda (Python serverless architecture)
-*   **Frontend**: Native Android (Kotlin, Jetpack Compose, Retrofit)
-*   **AI Engine**: Gemini 2.5 Flash / Claude 3.5 Sonnet
-*   **Communications**: Twilio Voice API & WhatsApp API
+| Category | Technology |
+|---------|------------|
+| Frontend | Kotlin, Jetpack Compose |
+| Backend | AWS Lambda (Python) |
+| AI Models | Gemini 2.5 Flash, Claude 3.5 Sonnet |
+| Communication | Twilio Voice API, WhatsApp API |
+| Networking | Retrofit |
 
----
+## Testing the Prototype
 
-##  Testing the Prototype (For Hackathon Judges)
+Since the project currently uses a Twilio Trial account, only verified numbers can receive messages.
 
-Since this project currently uses a **Twilio Trial account**, we cannot send messages or OTPs to unverified numbers. To test the WhatsApp OTP and Lesson Plan delivery features yourself, please join our Twilio WhatsApp Sandbox first:
+1. Open WhatsApp.
+2. Send `join <message>` to `+14155238886`.
+3. Wait for the confirmation message.
+4. Use the Android app to request OTPs and receive lesson plans.
 
-1. **Open WhatsApp** on your phone.
-2. Send the message **`join <message>`** to **`+14155238886`** (Twilio's Sandbox Number).
-3. You will receive a confirmation message from Twilio that you have joined the Sandbox.
-4. You can now use the Android App to request an OTP and generate lesson plans using your WhatsApp number!
+## Installation
 
----
+### Download APK
 
-##  Setup & Installation
+1. Visit the Releases page.
+2. Download the latest `PathShala-AI.apk`.
+3. Install it on your Android device.
 
-**Note**: The Python backend has been migrated to AWS Lambda and removed from this repository. This repo now exclusively hosts the Frontend Android App.
+### Build from Source
 
-To test the application instantly without building:
-1. Go to the [Releases page](https://github.com/G1r1shCodes/PathShala_AI/releases)
-2. Download the latest `PathShala-AI.apk`
-3. Install and run on your Android device.
+1. Open Android Studio.
+2. Open the `frontend/` directory.
+3. Sync Gradle files.
+4. Connect a device or emulator.
+5. Run the application.
 
-### Frontend Development (Android)
+## Additional Documentation
 
-If you wish to build the app from source:
+For product requirements, user flows, and API contracts, refer to:
 
-1.  Open **Android Studio**.
-2.  Select **Open** and choose the `frontend/` directory of this repository.
-3.  Sync Gradle files.
-4.  Connect your Android device or start an emulator.
-5.  Click **Run** to build and install the PathShala AI application on your device.
-
-##  Additional Context
-
-For more detailed product requirements, user flow, and API contracts, please refer to the MVP PRD:
-[PathShala AI MVP PRD](PathShala_AI_MVP_PRD.md)
+`PathShala_AI_MVP_PRD.md`
