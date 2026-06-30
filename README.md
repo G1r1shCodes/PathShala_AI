@@ -1,5 +1,21 @@
 # PathShala AI
 
+██████╗  █████╗ ████████╗██╗  ██╗███████╗██╗  ██╗ █████╗ ██╗      █████╗      █████╗ ██╗
+██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██╔════╝██║  ██║██╔══██╗██║     ██╔══██╗    ██╔══██╗██║
+██████╔╝███████║   ██║   ███████║███████╗███████║███████║██║     ███████║    ███████║██║
+██╔═══╝ ██╔══██║   ██║   ██╔══██║╚════██║██╔══██║██╔══██║██║     ██╔══██║    ██╔══██║██║
+██║     ██║  ██║   ██║   ██║  ██║███████║██║  ██║██║  ██║███████╗██║  ██║    ██║  ██║██║
+╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚═╝
+<p align="center">
+  <img src="https://img.shields.io/badge/Hackathon-AI%20for%20Bharat-blue?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Android-Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white">
+  <img src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=for-the-badge">
+  <img src="https://img.shields.io/badge/AWS-Lambda-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white">
+  <img src="https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Claude-3.5%20Sonnet-D97706?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Twilio-Voice%20%26%20WhatsApp-F22F46?style=for-the-badge&logo=twilio&logoColor=white">
+</p>
+
 **AI for Bharat Project Submission Repo**  
 *"GitHub Copilot for India's 1.1 Lakh Rural Teachers"*
 
