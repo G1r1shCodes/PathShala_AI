@@ -84,3 +84,5 @@ Since the project currently uses a Twilio Trial account, only verified numbers c
 For product requirements, user flows, and API contracts, refer to:
 
 `PathShala_AI_MVP_PRD.md`
+
+Thank you!!
